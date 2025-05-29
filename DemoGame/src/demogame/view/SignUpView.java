@@ -49,7 +49,6 @@ public class SignUpView extends JFrame {
 
         showPasswordCheck.setBounds(40, 350, 200, 30);
         showPasswordCheck.setFont(new Font("Comic Sans MS", Font.PLAIN, 16));
-        signUpPanel.add(showPasswordCheck);
 
         showPasswordCheck.addActionListener(e -> {
             if (showPasswordCheck.isSelected()) {
@@ -58,6 +57,7 @@ public class SignUpView extends JFrame {
                 passwordField.setEchoChar('•');
             }
         });
+         signUpPanel.add(showPasswordCheck);
 
         signUpButton.setBounds(40, 400, 320, 50);
         signUpButton.setBackground(Color.RED);
@@ -83,6 +83,25 @@ public class SignUpView extends JFrame {
         field.setBounds(40, y + 30, 320, 40);
         field.setFont(new Font("Comic Sans MS", Font.PLAIN, 16));
         panel.add(field);
+    }
+    // getters
+    public String getUsername() {
+        return usernameField.getText();
+    }
+
+    public String getEmail() {
+        return emailField.getText();
+    }
+
+    public String getPassword() {
+        return new String(passwordField.getPassword());
+    }
+     public JButton getSignUpButton() {
+        return signUpButton;
+    }
+
+    public JLabel getLoginLink() {
+        return loginLink;
     }
 
     public void showError(String message) {

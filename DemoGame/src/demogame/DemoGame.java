@@ -1,14 +1,20 @@
 package demogame;
 
-import demogame.model.SignUpModel;
-import demogame.view.SignUpView;
-import demogame.controller.SignupController;
+import demogame.controller.LoginController;
+import demogame.util.DatabaseConnection;
+import demogame.view.LoginView;
+import javax.swing.SwingUtilities;
 
 public class DemoGame {
     public static void main(String[] args) {
-        SignUpView signUpView = new SignUpView();
-        SignUpModel signUpModel = new SignUpModel();
-        new SignupController(signUpModel, signUpView);
-        signUpView.setVisible(true);
+        SwingUtilities.invokeLater(() -> {
+            LoginView loginPanel = new LoginView();
+            new LoginController(loginPanel);
+            loginPanel.setVisible(true);
+        });
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            DatabaseConnection.closeConnection();
+        }));
     }
 }

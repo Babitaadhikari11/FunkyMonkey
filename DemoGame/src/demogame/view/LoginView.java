@@ -22,8 +22,10 @@ public class LoginView extends JFrame {
 
         JLayeredPane layeredPane = new JLayeredPane();
         getContentPane().add(layeredPane);
+//this is background for login page
+        
 
-        ImageIcon bgIcon = new ImageIcon(getClass().getResource("/resources/Background.jpg"));
+         ImageIcon bgIcon = new ImageIcon(getClass().getResource("/resources/Background.jpg"));
         Image scaled = bgIcon.getImage().getScaledInstance(1200, 800, Image.SCALE_SMOOTH);
         JLabel background = new JLabel(new ImageIcon(scaled));
         background.setBounds(0, 0, 1200, 800);
@@ -86,10 +88,25 @@ public class LoginView extends JFrame {
         field.setFont(new Font("Comic Sans MS", Font.PLAIN, 16));
         panel.add(field);
     }
+    // getters
+    public String getUsername(){
+        return usernameField.getText();
+    }
+    public String getPassword(){
+        return new String(passwordField.getPassword());
+    }
+    public JButton getLoginButton() {
+        return loginButton;
+    }
 
     public JLabel getCreateAccountLink() {
         return createAccountLink;
     }
+
+
+    /*public JLabel getCreateAccountLink() {
+        return createAccountLink;
+    }*/
 
     public void showError(String message) {
         JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
