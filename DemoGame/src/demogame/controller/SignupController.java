@@ -1,66 +1,63 @@
 package demogame.controller;
 
-import demogame.model.SignUpModel;
-import demogame.view.SignUpView;
+import demogame.dao.UserDao;
+import demogame.model.UserData;
 import demogame.view.LoginView;
-import demogame.model.LoginModel;
+import demogame.view.SignUpView;
 import javax.swing.JOptionPane;
 import java.awt.event.*;
 
 public class SignupController {
-    private SignUpModel model;
+    private UserDao userDAO;
     private SignUpView view;
 
-    public SignupController(SignUpModel model, SignUpView view) {
-        this.model = model;
+    public SignupController(SignUpView view) {
         this.view = view;
+        this.userDAO = new UserDao();
 
-        view.signUpButton.addActionListener(e -> handleSignUp());
+        view.getSignUpButton().addActionListener(e -> handleSignUp());
 
-        // Use MouseListener for the JLabel loginLink
-        view.loginLink.addMouseListener(new MouseAdapter() {
+        view.getLoginLink().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                System.out.println("Login link clicked in SignUpView");
                 handleLoginLink();
             }
         });
     }
 
     private void handleSignUp() {
-        String username = view.usernameField.getText();
-        String email = view.emailField.getText();
-        String password = new String(view.passwordField.getPassword());
+        String username = view.getUsername();
+        String email = view.getEmail();
+        String password = view.getPassword();
+       
 
-        if (model.register(username, email, password)) {
+        // Validate inputs
+        if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            view.showError("All fields are required.");
+            return;
+        }
+
+        
+
+        UserData user = new UserData(username, email, password);
+        if (userDAO.register(user)) {
             view.showSuccess("Registration successful! Please log in.");
-            view.dispose();
-            navigateToLoginView();
+            view.setVisible(false);
+            navigateToLoginPanel();
         } else {
-            String errorMessage = model.getErrorMessage() != null ? model.getErrorMessage() : "Registration failed.";
+            String errorMessage = userDAO.getErrorMessage() != null ? userDAO.getErrorMessage() : "Registration failed.";
             view.showError(errorMessage);
         }
     }
 
     private void handleLoginLink() {
-        System.out.println("Handling login link navigation");
-        view.dispose();
-        navigateToLoginView();
+        view.setVisible(false);
+        navigateToLoginPanel();
     }
 
-    private void navigateToLoginView() {
-        try {
-            System.out.println("Creating new LoginView");
-            LoginView loginView = new LoginView();
-            System.out.println("Creating new LoginModel");
-            LoginModel loginModel = new LoginModel();
-            System.out.println("Creating new LoginController");
-            new LoginController(loginModel, loginView);
-            System.out.println("Setting LoginView visible");
-            loginView.setVisible(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Error navigating to LoginView: " + e.getMessage(), "Navigation Error", JOptionPane.ERROR_MESSAGE);
-        }
+    private void navigateToLoginPanel() {
+        LoginView loginPanel = new LoginView();
+        new LoginController(loginPanel);
+        loginPanel.setVisible(true);
     }
 }
