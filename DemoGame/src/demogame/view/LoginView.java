@@ -1,7 +1,5 @@
 package demogame.view;
 
-import demogame.controller.SignupController;
-import demogame.model.SignUpModel;
 import demogame.util.RoundedPanel;
 
 import javax.swing.*;
@@ -17,41 +15,41 @@ public class LoginView extends JFrame {
 
     public LoginView() {
         setTitle("DemoGame - Login");
-        setSize(800, 600);
+        setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
 
         JLayeredPane layeredPane = new JLayeredPane();
         getContentPane().add(layeredPane);
+//this is background for login page
+        
 
-        // Background Image
-        ImageIcon bgIcon = new ImageIcon(getClass().getResource("/resources/Background.jpg"));
-        Image scaled = bgIcon.getImage().getScaledInstance(800, 600, Image.SCALE_SMOOTH);
+         ImageIcon bgIcon = new ImageIcon(getClass().getResource("/resources/Background.jpg"));
+        Image scaled = bgIcon.getImage().getScaledInstance(1200, 800, Image.SCALE_SMOOTH);
         JLabel background = new JLabel(new ImageIcon(scaled));
-        background.setBounds(0, 0, 800, 600);
+        background.setBounds(0, 0, 1200, 800);
         layeredPane.add(background, Integer.valueOf(0));
 
-        // Right Panel
         RoundedPanel loginPanel = new RoundedPanel(30);
         loginPanel.setBackground(Color.WHITE);
         loginPanel.setLayout(null);
-        loginPanel.setBounds(420, 80, 360, 400);
+        loginPanel.setBounds(720, 150, 400, 500);
         layeredPane.add(loginPanel, Integer.valueOf(1));
 
         JLabel title = new JLabel("Welcome Back !");
-        title.setFont(new Font("Comic Sans MS", Font.BOLD, 22));
+        title.setFont(new Font("Comic Sans MS", Font.BOLD, 28));
         title.setForeground(Color.RED);
-        title.setBounds(70, 20, 250, 30);
+        title.setBounds(80, 30, 300, 40);
         loginPanel.add(title);
 
-        addLabeledField(loginPanel, "Username:", usernameField, 70);
-        addLabeledField(loginPanel, "Password:", passwordField, 140);
+        addLabeledField(loginPanel, "Username:", usernameField, 90);
+        addLabeledField(loginPanel, "Password:", passwordField, 180);
 
-        showPasswordCheck.setBounds(30, 200, 200, 25);
+        showPasswordCheck.setBounds(40, 260, 200, 30);
+        showPasswordCheck.setFont(new Font("Comic Sans MS", Font.PLAIN, 16));
         loginPanel.add(showPasswordCheck);
 
-        // Show/hide password logic
         showPasswordCheck.addActionListener(e -> {
             if (showPasswordCheck.isSelected()) {
                 passwordField.setEchoChar((char) 0);
@@ -60,47 +58,55 @@ public class LoginView extends JFrame {
             }
         });
 
-        loginButton.setBounds(30, 240, 300, 40);
+        loginButton.setBounds(40, 310, 320, 50);
         loginButton.setBackground(Color.RED);
         loginButton.setForeground(Color.WHITE);
-        loginButton.setFont(new Font("Comic Sans MS", Font.BOLD, 16));
+        loginButton.setFont(new Font("Comic Sans MS", Font.BOLD, 20));
         loginButton.setOpaque(true);
         loginButton.setBorderPainted(false);
         loginPanel.add(loginButton);
 
         JLabel question = new JLabel("Don't have an account?");
-        question.setBounds(30, 300, 160, 25);
-        question.setFont(new Font("Comic Sans MS", Font.PLAIN, 13));
+        question.setBounds(40, 380, 180, 30);
+        question.setFont(new Font("Comic Sans MS", Font.PLAIN, 16));
         loginPanel.add(question);
 
         createAccountLink.setForeground(Color.BLUE);
-        createAccountLink.setFont(new Font("Comic Sans MS", Font.PLAIN, 13));
-        createAccountLink.setBounds(190, 300, 140, 25);
+        createAccountLink.setFont(new Font("Comic Sans MS", Font.PLAIN, 16));
+        createAccountLink.setBounds(220, 380, 140, 30);
         createAccountLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         loginPanel.add(createAccountLink);
-
-        // Redirect to SignUpView
-        createAccountLink.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                dispose();
-                SignUpView signUpView = new SignUpView();
-                SignUpModel signUpModel = new SignUpModel();
-                new SignupController(signUpModel, signUpView);
-                signUpView.setVisible(true);
-            }
-        });
     }
 
     private void addLabeledField(JPanel panel, String label, JComponent field, int y) {
         JLabel jLabel = new JLabel(label);
-        jLabel.setFont(new Font("Comic Sans MS", Font.PLAIN, 14));
-        jLabel.setBounds(30, y, 200, 25);
+        jLabel.setFont(new Font("Comic Sans MS", Font.PLAIN, 16));
+        jLabel.setBounds(40, y, 200, 30);
         panel.add(jLabel);
 
-        field.setBounds(30, y + 25, 300, 30);
+        field.setBounds(40, y + 30, 320, 40);
+        field.setFont(new Font("Comic Sans MS", Font.PLAIN, 16));
         panel.add(field);
     }
+    // getters
+    public String getUsername(){
+        return usernameField.getText();
+    }
+    public String getPassword(){
+        return new String(passwordField.getPassword());
+    }
+    public JButton getLoginButton() {
+        return loginButton;
+    }
+
+    public JLabel getCreateAccountLink() {
+        return createAccountLink;
+    }
+
+
+    /*public JLabel getCreateAccountLink() {
+        return createAccountLink;
+    }*/
 
     public void showError(String message) {
         JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);

@@ -1,27 +1,52 @@
 package demogame.model;
 
-import demogame.util.DatabaseConnection;
+import demogame.dao.LoginDAO;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class LoginModel {
+    private LoginDAO loginDAO;
+    private String errorMessage;
+    private int userId;
+
+    public LoginModel() {
+        this.loginDAO = new LoginDAO();
+    }
+
     public boolean validateLogin(String username, String password) {
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(
-                     "SELECT password FROM users WHERE username = ?")) {
-            stmt.setString(1, username);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                String storedPassword = rs.getString("password");
-                return password.equals(storedPassword); // Compare plain text passwords
-            }
-            return false; // Username not found
-        } catch (SQLException e) {
-            e.printStackTrace();
+        this.errorMessage = null;
+        this.userId = -1;
+
+        if (username == null || username.trim().isEmpty()) {
+            this.errorMessage = "Username cannot be empty.";
             return false;
         }
+        if (password == null || password.trim().isEmpty()) {
+            this.errorMessage = "Password cannot be empty.";
+            return false;
+        }
+
+        try {
+            int userId = loginDAO.validateCredentials(username, password);
+            if (userId != -1) {
+                this.userId = userId;
+                loginDAO.logLoginAttempt(userId);
+                return true;
+            } else {
+                this.errorMessage = "Invalid username or password.";
+                return false;
+            }
+        } catch (SQLException e) {
+            this.errorMessage = "Database error: " + e.getMessage();
+            return false;
+        }
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public int getUserId() {
+        return userId;
     }
 }

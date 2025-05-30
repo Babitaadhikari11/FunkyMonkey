@@ -1,58 +1,52 @@
 package demogame.model;
 
-import demogame.util.DatabaseConnection;
+import demogame.dao.SignUpDAO;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class SignUpModel {
-    private String username;
-    private String password;
-    private String email;
+    private SignUpDAO signUpDAO;
+    private String errorMessage;
 
-    public boolean validateAndSave(String username, String password, String email) {
-        // Basic input validation
+    public SignUpModel() {
+        this.signUpDAO = new SignUpDAO();
+    }
+
+    public boolean register(String username, String email, String password) {
+        this.errorMessage = null;
+
         if (username == null || username.trim().isEmpty()) {
+            this.errorMessage = "Username cannot be empty.";
             return false;
         }
-        if (password == null || password.length() < 6) {
+        if (email == null || email.trim().isEmpty()) {
+            this.errorMessage = "Email cannot be empty.";
             return false;
         }
-        if (email == null || !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            this.errorMessage = "Invalid email format.";
+            return false;
+        }
+        if (password == null || password.trim().isEmpty()) {
+            this.errorMessage = "Password cannot be empty.";
             return false;
         }
 
-        // Save to database (plain text password)
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(
-                     "INSERT INTO users (username, email, password) VALUES (?, ?, ?)")) {
-            stmt.setString(1, username);
-            stmt.setString(2, email);
-            stmt.setString(3, password); // Store plain text password
-            stmt.executeUpdate();
-            this.username = username;
-            this.password = password;
-            this.email = email;
-            return true;
+        try {
+            return signUpDAO.registerUser(username, email, password);
         } catch (SQLException e) {
-            if (e.getSQLState().equals("23000")) { // Duplicate entry error
-                return false;
+            if (e.getMessage().contains("Duplicate entry") && e.getMessage().contains("username")) {
+                this.errorMessage = "Username already exists.";
+            } else if (e.getMessage().contains("Duplicate entry") && e.getMessage().contains("email")) {
+                this.errorMessage = "Email already exists.";
+            } else {
+                this.errorMessage = "Database error: " + e.getMessage();
             }
-            e.printStackTrace();
             return false;
         }
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getEmail() {
-        return email;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 }
