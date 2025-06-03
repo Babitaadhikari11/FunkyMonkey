@@ -2,17 +2,29 @@ package demogame.controller;
 
 import demogame.model.UserData;
 import demogame.view.MenuView;
+<<<<<<< HEAD
 
+=======
+// import demogame.view.UserUpdateView;
+>>>>>>> cbe49f0c9b96a62bd2c68d6b96c2c63be4620f52
 
 import javax.swing.*;
 
 public class MenuController {
     private MenuView view;
+<<<<<<< HEAD
     
 
     public MenuController(MenuView view, UserData currentUser) {
         this.view = view; //receives view and user data from loginPage
         
+=======
+    private UserData currentUser;
+
+    public MenuController(MenuView view, UserData currentUser) {
+        this.view = view; //receives view and user data from loginPage
+        this.currentUser = currentUser; //this contains userinformation from database
+>>>>>>> cbe49f0c9b96a62bd2c68d6b96c2c63be4620f52
         setupButtonListeners();
     }
 // button action
@@ -22,7 +34,17 @@ public class MenuController {
             JOptionPane.showMessageDialog(view, "Starting game...");
         });
 
+<<<<<<< HEAD
        
+=======
+        // view.getUpdateButton().addActionListener(e -> {
+        //     // prevent overlapping of window of updateuser and menu view
+        //     view.setVisible(false);
+        //     UserUpdateView updateView = new UserUpdateView(currentUser.getUsername(), currentUser.getEmail());
+        //     new UserUpdateController(updateView, currentUser);
+        //     updateView.setVisible(true);
+        // });
+>>>>>>> cbe49f0c9b96a62bd2c68d6b96c2c63be4620f52
 
         view.getQuitButton().addActionListener(e -> {
             //this will show confirmation dialog , a JOptionPane feature
