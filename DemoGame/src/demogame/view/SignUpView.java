@@ -105,7 +105,7 @@ public class SignUpView extends JFrame {
     }
 
     public void showError(String message) {
-        JOptionPane.showMessageDialog(this, message, " Error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this, message, "   Error", JOptionPane.ERROR_MESSAGE);
     }
 
     public void showSuccess(String message) {
