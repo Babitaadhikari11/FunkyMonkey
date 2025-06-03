@@ -27,7 +27,7 @@ public class MenuView extends JFrame {
 
         // Set background
         try {
-            ImageIcon bgIcon = new ImageIcon(getClass().getResource("/resources/enmu.jpeg"));
+            ImageIcon bgIcon = new ImageIcon(getClass().getResource("/resources/menu.jpeg"));
             Image scaled = bgIcon.getImage().getScaledInstance(1200, 800, Image.SCALE_SMOOTH);
             JLabel background = new JLabel(new ImageIcon(scaled));
             background.setBounds(0, 0, 1200, 800);
