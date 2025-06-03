@@ -54,9 +54,9 @@ public class MenuView extends JFrame {
 
     private void setupButtons(JLayeredPane layeredPane) {
         // Create buttons with images
-        startButton = createImageButton("/resources/buttons.jpeg", "Start Game", 250);
-        updateButton = createImageButton("/resources/buttons.jpeg", "Update Profile", 380);
-        quitButton = createImageButton("/resources/buttons.jpeg", "Quit Game", 510);
+        startButton = createImageButton("/resources/buttons.png", "Start Game", 250);
+        updateButton = createImageButton("/resources/buttons.png", "Update Profile", 380);
+        quitButton = createImageButton("/resources/buttons.png", "Quit Game", 510);
 
         // Center buttons horizontally and position vertically
         int buttonX = (1200 - 300) / 2; // Center horizontally

@@ -16,5 +16,6 @@ public class DemoGame {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             DatabaseConnection.closeConnection();
         }));
+        
     }
 }
