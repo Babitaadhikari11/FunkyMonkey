@@ -3,6 +3,7 @@ package demogame.controller;
 import demogame.dao.UserDao;
 import demogame.model.UserData;
 import demogame.view.LoginView;
+import demogame.view.MenuView;
 import demogame.view.SignUpView;
 import java.awt.event.*;
 
@@ -16,17 +17,25 @@ public class LoginController {
 
         // Add action listener for login button
         view.getLoginButton().addActionListener(e -> handleLogin());
-
-        // Add mouse listener for create account link
-        view.getCreateAccountLink().addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
+        
+        view.getCreateAccountLink().addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent e){
                 view.setVisible(false);
-                SignUpView signUpPanel = new SignUpView();
-                new SignupController(signUpPanel);
-                signUpPanel.setVisible(true);
+                SignUpView signUpView =  new SignUpView();
+                signUpView.setVisible(true);
             }
         });
+
+        // // Add mouse listener for create account link
+        // view.getCreateAccountLink().addMouseListener(new MouseAdapter() {
+        //     @Override
+        //     public void mouseClicked(MouseEvent e) {
+        //         view.setVisible(false);
+        //         SignUpView signUpPanel = new SignUpView();
+        //         new SignupController(signUpPanel);
+        //         signUpPanel.setVisible(true);
+        //     }
+        // });
     }
 
     private void handleLogin() {
@@ -41,7 +50,12 @@ public class LoginController {
         UserData user = userDAO.authenticate(username, password);
         if (user != null) {
             view.showSuccess("Login successful! Welcome, " + username + "!");
-            // No navigation to MenuPanel; stay on LoginPanel
+            //  navigation to MenuPanel; 
+            view.setVisible(false);
+            MenuView menuView =  new MenuView(username);
+            new MenuController(menuView, user); // passing the user object
+            menuView.setVisible(true);
+
         } else {
             view.showError(userDAO.getErrorMessage());
         }
