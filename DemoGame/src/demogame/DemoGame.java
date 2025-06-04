@@ -12,9 +12,11 @@ public class DemoGame {
             new LoginController(loginPanel);
             loginPanel.setVisible(true);
         });
+        
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             DatabaseConnection.closeConnection();
         }));
+        
     }
 }
