@@ -1,5 +1,6 @@
 
 package demogame.view;
+import demogame.util.BackgroundMusicPlayer;
 import java.awt.*;
 import javax.swing.*;
 
@@ -70,14 +71,28 @@ public class MenuView extends JFrame {
 
         // Sound toggle button (bottom right corner)
         soundButton = new JToggleButton("Sound: ON");
+        boolean musicOn = BackgroundMusicPlayer.isPlaying();
+        soundButton.setSelected(!musicOn);
+        soundButton.setText(musicOn ? "Sound: ON" : "Sound: OFF");
+
         soundButton.setBounds(1050, 700, 120, 40);
         soundButton.setFont(new Font("Comic Sans MS", Font.PLAIN, 14));
         soundButton.setFocusPainted(false);
-        soundButton.addActionListener(e -> 
-            soundButton.setText(soundButton.isSelected() ? "Sound: OFF" : "Sound: ON")
-        );
-        layeredPane.add(soundButton, Integer.valueOf(1));
+        
+        soundButton.addActionListener(e -> {
+            if (soundButton.isSelected()) {
+                BackgroundMusicPlayer.stop();
+                soundButton.setText("Sound: OFF");
+            } else {
+                BackgroundMusicPlayer.playLoop("C:\\Users\\SyKEHUNK\\Desktop\\New folder (3)\\DemoGame\\src\\resources\\music1.wav");
+                soundButton.setText("Sound: ON");
+          }
+       });
+       
+       layeredPane.add(soundButton, JLayeredPane.POPUP_LAYER);
+ 
     }
+    
 
     private JButton createImageButton(String imagePath, String text, int yPosition) {
         JButton button = new JButton() {
