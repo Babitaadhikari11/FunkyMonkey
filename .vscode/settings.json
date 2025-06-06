@@ -1,6 +1,8 @@
 {
-  "java.project.sourcePaths": ["DemoGame/src"],
+  "java.project.sourcePaths": [
+    "DemoGame\\src"
+  ],
   "java.project.referencedLibraries": [
-    "/Users/babitaadhikari/Downloads/mysql-connector-j-9.2.0/mysql-connector-j-9.2.0.jar"
+    "c:\\Users\\SyKEHUNK\\Downloads\\mysql-connector-j-9.3.0\\mysql-connector-j-9.3.0\\mysql-connector-j-9.3.0.jar"
   ]
 }
