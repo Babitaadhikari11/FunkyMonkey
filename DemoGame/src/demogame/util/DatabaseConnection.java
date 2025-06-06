@@ -12,15 +12,9 @@ public class DatabaseConnection {
             // Added allowPublicKeyRetrieval=true to fix "Public Key Retrieval is not allowed" error
             String url = "jdbc:mysql://localhost:3306/funkymonkey?useSSL=false&allowPublicKeyRetrieval=true";
             String user = "root";
-<<<<<<< HEAD
+
             String password = "funkymonkey123"; // Your MySQL root password
-=======
-<<<<<<< HEAD
-            String password = "funkymonkey123"; // Your MySQL root password
-=======
-            String password = "Babita@000"; // Your MySQL root password
->>>>>>> 4bca1e4ac703fa2092ef69540c903863cfc1aee1
->>>>>>> cbe49f0c9b96a62bd2c68d6b96c2c63be4620f52
+
             try {
                 // No need for Class.forName("com.mysql.cj.jdbc.Driver");
                 // The MySQL Connector/J driver auto-registers via JDBC 4.0 SPI
