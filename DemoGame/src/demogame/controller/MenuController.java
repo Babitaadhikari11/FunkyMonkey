@@ -1,6 +1,7 @@
 package demogame.controller;
 
 import demogame.model.UserData;
+import demogame.view.LoadingView;
 import demogame.view.MenuView;
 
 
@@ -19,7 +20,15 @@ public class MenuController {
     private void setupButtonListeners() {
         // getting startbutton from view using getStartButton
         view.getStartButton().addActionListener(e -> {
-            JOptionPane.showMessageDialog(view, "Starting game...");
+       // Close the menu view
+            view.dispose();
+            
+            // Create and show the loading view
+            SwingUtilities.invokeLater(() -> {
+                LoadingView loadingView = new LoadingView();
+                LoadingController loadingController = new LoadingController(loadingView);
+                loadingView.setVisible(true);
+            });
         });
 
        
