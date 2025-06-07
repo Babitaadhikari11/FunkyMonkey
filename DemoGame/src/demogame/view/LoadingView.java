@@ -28,7 +28,7 @@ public class LoadingView  extends JFrame{
     }
     private void initializeComponents(){
         // logo setup
-        ImageIcon logoIcon =  new ImageIcon(getClass().getResource("/resources/Logo.jpeg"));
+        ImageIcon logoIcon =  new ImageIcon(getClass().getResource("/resources/logo.jpeg"));
         Image scaledLogo = logoIcon.getImage().getScaledInstance(300,300,Image.SCALE_SMOOTH);
         logoLabel = new JLabel(new ImageIcon(scaledLogo));
 
