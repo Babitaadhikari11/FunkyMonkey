@@ -1,0 +1,8 @@
+{
+    "java.project.sourcePaths": [
+        "src"
+    ],
+    "java.project.referencedLibraries": [
+        "/Users/niranjanrana/Downloads/mysql-connector-j-9.2.0 2/mysql-connector-j-9.2.0.jar"
+    ]
+}
