@@ -2,10 +2,11 @@ package demogame.controller;
 
 import demogame.dao.UserDao;
 import demogame.model.UserData;
+import demogame.view.GameView;
 import demogame.view.LoginView;
-import demogame.view.SignUpView;
 import demogame.view.MenuView;
-import java.awt.event.*;
+import demogame.view.SignUpView;
+import javax.swing.SwingUtilities;
 
 public class LoginController {
     private UserDao userDAO;
@@ -51,4 +52,13 @@ public class LoginController {
             view.showError(userDAO.getErrorMessage());
         }
     }
+    private void launchGame() {
+    SwingUtilities.invokeLater(() -> {
+        view.dispose();
+        GameView gameView = new GameView(); // ⬅️ This should create the frame with GamePanel
+        new GameController(gameView);       // ⬅️ Optional logic
+        gameView.setVisible(true);
+    });
+}
+
 }
