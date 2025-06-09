@@ -1,41 +1,45 @@
 package demogame.view;
 
-import javax.swing.*;
 import java.awt.*;
-import demogame.controller.ScoreController;
+import javax.swing.*;
 
 public class GameScreen extends JFrame {
     private JLabel scoreLabel;
-    private ScoreController scoreController;
+    private int score = 0;
 
     public GameScreen() {
         setTitle("Game Screen");
-        setSize(800, 600);
+        setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setResizable(false);
+
+        // Set layout to null for absolute positioning
         setLayout(null);
 
-        // Score label
+        // Background (optional)
+        JLabel background = new JLabel(new ImageIcon(getClass().getResource("/resources/Background.jpg")));
+        background.setBounds(0, 0, 1200, 800);
+        setContentPane(background);
+        background.setLayout(null); // Allow absolute layout on content
+
+        // Score label setup
         scoreLabel = new JLabel("Score: 0");
-        scoreLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        scoreLabel.setForeground(Color.WHITE);
-        scoreLabel.setBounds(20, 20, 200, 30);
-        add(scoreLabel);
+        scoreLabel.setFont(new Font("Comic Sans MS", Font.BOLD, 24));
+        scoreLabel.setForeground(Color.YELLOW);
+        scoreLabel.setBounds(20, 20, 200, 30); // Top-left corner
 
-        getContentPane().setBackground(Color.BLACK);
-
-        // Score controller
-        scoreController = new ScoreController(scoreLabel);
-
-        // Simulate gameplay
-        JButton addScoreButton = new JButton("Earn 10 Points");
-        addScoreButton.setBounds(300, 250, 200, 50);
-        add(addScoreButton);
-        addScoreButton.addActionListener(e -> scoreController.increaseScore(10));
-
-        setVisible(true);
+        background.add(scoreLabel);
     }
 
-    public ScoreController getScoreController() {
-        return scoreController;
+    // Method to update score
+    public void updateScore(int newScore) {
+        this.score = newScore;
+        scoreLabel.setText("Score: " + score);
+    }
+
+    // Optional: increment method
+    public void incrementScore(int delta) {
+        updateScore(score + delta);
     }
 }
