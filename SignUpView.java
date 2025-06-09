@@ -1,127 +1,114 @@
-import java.awt.*;
+package demogame.view;
+
+import demogame.util.RoundedPanel;
+
 import javax.swing.*;
+import java.awt.*;
 
 public class SignUpView extends JFrame {
+    public JTextField usernameField = new JTextField();
+    public JTextField emailField = new JTextField();
+    public JPasswordField passwordField = new JPasswordField();
+    public JCheckBox showPasswordCheck = new JCheckBox("Show Password");
+    public JButton signUpButton = new JButton("Sign Up");
+    public JLabel loginLink = new JLabel("<html><u>Already have an account? Login</u></html>");
 
     public SignUpView() {
-        setTitle("FunkyMonkey - Sign Up");  
-        setSize(1000, 600);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setTitle("DemoGame - Sign Up");
+        setSize(1200, 800);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
 
-        // Load background image
-        ImageIcon bgIcon = new ImageIcon("background.png");
-        Image bgImage = bgIcon.getImage();
+        JLayeredPane layeredPane = new JLayeredPane();
+        getContentPane().add(layeredPane);
 
-        // Background panel
-        JPanel backgroundPanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                g.drawImage(bgImage, 0, 0, getWidth(), getHeight(), this);
+        // Background Image
+        ImageIcon bgIcon = new ImageIcon(getClass().getResource("/resources/Background.jpg"));
+        Image scaled = bgIcon.getImage().getScaledInstance(1200, 800, Image.SCALE_SMOOTH);
+        JLabel background = new JLabel(new ImageIcon(scaled));
+        background.setBounds(0, 0, 1200, 800);
+        layeredPane.add(background, Integer.valueOf(0));
+
+        // Right Panel (moved lower)
+        RoundedPanel signUpPanel = new RoundedPanel(30);
+        signUpPanel.setBackground(Color.WHITE);
+        signUpPanel.setLayout(null);
+        signUpPanel.setBounds(720, 130, 400, 600);  // Changed y from 80 to 130
+        layeredPane.add(signUpPanel, Integer.valueOf(1));
+
+        JLabel title = new JLabel("Create Account");
+        title.setFont(new Font("Comic Sans MS", Font.BOLD, 28));
+        title.setForeground(Color.RED);
+        title.setBounds(80, 30, 300, 40);
+        signUpPanel.add(title);
+
+        addLabeledField(signUpPanel, "Username:", usernameField, 90);
+        addLabeledField(signUpPanel, "Email:", emailField, 180);
+        addLabeledField(signUpPanel, "Password:", passwordField, 270);
+
+        showPasswordCheck.setBounds(40, 350, 200, 30);
+        showPasswordCheck.setFont(new Font("Comic Sans MS", Font.PLAIN, 16));
+
+        showPasswordCheck.addActionListener(e -> {
+            if (showPasswordCheck.isSelected()) {
+                passwordField.setEchoChar((char) 0);
+            } else {
+                passwordField.setEchoChar('•');
             }
-        };
-        backgroundPanel.setLayout(null);
-        setContentPane(backgroundPanel);
-
-       
-       
-    
-
-        // Form Panel
-        JPanel formPanel = new RoundedPanel(30);
-        formPanel.setBackground(Color.WHITE);
-        formPanel.setBounds(600, 100, 350, 450);
-        formPanel.setLayout(null);
-        backgroundPanel.add(formPanel);
-
-        JLabel formTitle = new JLabel("Create your free account");
-        formTitle.setFont(new Font("SansSerif", Font.BOLD, 18));
-        formTitle.setBounds(40, 20, 300, 30);
-        formPanel.add(formTitle);
-
-        // Name Label and Field
-        JLabel nameLabel = new JLabel("Name");
-        nameLabel.setBounds(40, 60, 270, 20);
-        formPanel.add(nameLabel);
-
-        JTextField nameField = new JTextField();
-        nameField.setBounds(40, 80, 270, 35);
-        formPanel.add(nameField);
-
-        // Email Label and Field
-        JLabel emailLabel = new JLabel("Email");
-        emailLabel.setBounds(40, 125, 270, 20);
-        formPanel.add(emailLabel);
-
-        JTextField emailField = new JTextField();
-        emailField.setBounds(40, 145, 270, 35);
-        formPanel.add(emailField);
-
-        // Password Label and Field
-        JLabel passLabel = new JLabel("Password");
-        passLabel.setBounds(40, 190, 270, 20);
-        formPanel.add(passLabel);
-
-        JPasswordField passField = new JPasswordField();
-        passField.setBounds(40, 210, 270, 35);
-        formPanel.add(passField);
-
-        // Confirm Password Label and Field
-        JLabel confirmLabel = new JLabel("Confirm Password");
-        confirmLabel.setBounds(40, 255, 270, 20);
-        formPanel.add(confirmLabel);
-
-        JPasswordField confirmField = new JPasswordField();
-        confirmField.setBounds(40, 275, 270, 35);
-        formPanel.add(confirmField);
-
-        // Show Password Checkbox
-        JCheckBox showPass = new JCheckBox("Show Password");
-        showPass.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        showPass.setBounds(40, 320, 150, 25);
-        showPass.setOpaque(false);
-        formPanel.add(showPass);
-
-        // Sign Up Button
-        JButton signUpBtn = new JButton("Sign Up");
-        signUpBtn.setBounds(40, 360, 270, 45);
-        signUpBtn.setBackground(new Color(220, 53, 69));
-        signUpBtn.setForeground(Color.WHITE);
-        signUpBtn.setFont(new Font("SansSerif", Font.BOLD, 16));
-        formPanel.add(signUpBtn);
-
-        // Show/Hide Password Logic
-        showPass.addActionListener(e -> {
-            boolean show = showPass.isSelected();
-            passField.setEchoChar(show ? (char) 0 : '*');
-            confirmField.setEchoChar(show ? (char) 0 : '*');
         });
+         signUpPanel.add(showPasswordCheck);
 
-        setVisible(true);
+        signUpButton.setBounds(40, 400, 320, 50);
+        signUpButton.setBackground(Color.RED);
+        signUpButton.setForeground(Color.WHITE);
+        signUpButton.setFont(new Font("Comic Sans MS", Font.BOLD, 20));
+        signUpButton.setOpaque(true);
+        signUpButton.setBorderPainted(false);
+        signUpPanel.add(signUpButton);
+
+        loginLink.setForeground(Color.BLUE);
+        loginLink.setFont(new Font("Comic Sans MS", Font.PLAIN, 16));
+        loginLink.setBounds(40, 470, 300, 30);
+        loginLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        signUpPanel.add(loginLink);
     }
 
-    // Rounded panel class
-    class RoundedPanel extends JPanel {
-        private int radius;
+    private void addLabeledField(JPanel panel, String label, JComponent field, int y) {
+        JLabel jLabel = new JLabel(label);
+        jLabel.setFont(new Font("Comic Sans MS", Font.PLAIN, 16));
+        jLabel.setBounds(40, y, 200, 30);
+        panel.add(jLabel);
 
-        public RoundedPanel(int radius) {
-            this.radius = radius;
-            setOpaque(false);
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            Graphics2D g2 = (Graphics2D) g;
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(getBackground());
-            g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
-            super.paintComponent(g);
-        }
+        field.setBounds(40, y + 30, 320, 40);
+        field.setFont(new Font("Comic Sans MS", Font.PLAIN, 16));
+        panel.add(field);
+    }
+    // getters
+    public String getUsername() {
+        return usernameField.getText();
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(SignUpView::new);
+    public String getEmail() {
+        return emailField.getText();
+    }
+
+    public String getPassword() {
+        return new String(passwordField.getPassword());
+    }
+     public JButton getSignUpButton() {
+        return signUpButton;
+    }
+
+    public JLabel getLoginLink() {
+        return loginLink;
+    }
+
+    public void showError(String message) {
+        JOptionPane.showMessageDialog(this, message, "   Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public void showSuccess(String message) {
+        JOptionPane.showMessageDialog(this, message, "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 }
