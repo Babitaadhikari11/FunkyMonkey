@@ -3,8 +3,6 @@ package demogame.controller;
 import demogame.model.UserData;
 import demogame.view.LoadingView;
 import demogame.view.MenuView;
-
-
 import javax.swing.*;
 
 public class MenuController {
