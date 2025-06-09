@@ -1,26 +1,35 @@
 package demogame.controller;
 
 import demogame.model.Score;
+import javax.swing.JLabel;
 
 public class ScoreController {
     private Score score;
+    private JLabel scoreLabel;
 
-    public ScoreController() {
+    public ScoreController(JLabel scoreLabel) {
         this.score = new Score();
+        this.scoreLabel = scoreLabel;
+        updateLabel();
     }
 
     public void increaseScore(int points) {
         score.addPoints(points);
-        System.out.println("Score Updated: " + score.getScore());
+        updateLabel();
     }
 
     public void resetScore() {
         score.reset();
-        System.out.println("Score Reset.");
+        updateLabel();
     }
 
     public int getScore() {
         return score.getScore();
     }
-}
 
+    private void updateLabel() {
+        if (scoreLabel != null) {
+            scoreLabel.setText("Score: " + score.getScore());
+        }
+    }
+}
