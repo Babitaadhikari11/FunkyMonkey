@@ -1,10 +1,10 @@
 package demogame.controller;
 import demogame.dao.GameTipDao;
 import demogame.model.GameTip;
-import demogame.view.LoadingView;
-import demogame.view.GameView; //  actual game view
-import javax.swing.*;
+import demogame.view.GameView;
+import demogame.view.LoadingView; //  actual game view
 import java.util.List;
+import javax.swing.*;
 public class LoadingController {
      private LoadingView view;
     private GameTipDao tipDao;
