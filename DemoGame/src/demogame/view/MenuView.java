@@ -84,7 +84,7 @@ public class MenuView extends JFrame {
                 BackgroundMusicPlayer.stop();
                 soundButton.setText("Sound: OFF");
             } else {
-                BackgroundMusicPlayer.playLoop("C:\\Users\\SyKEHUNK\\Desktop\\Game\\DemoGame\\src\\resources\\music1.wav");
+                BackgroundMusicPlayer.playLoop("C:\\Users\\acer\\Desktop\\FunkyMonkey\\DemoGame\\src\\resources\\music1.wav");
                 soundButton.setText("Sound: ON");
           }
        });

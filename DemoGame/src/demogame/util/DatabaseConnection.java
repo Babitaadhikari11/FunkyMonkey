@@ -10,7 +10,7 @@ public class DatabaseConnection {
     public static Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
             // Added allowPublicKeyRetrieval=true to fix "Public Key Retrieval is not allowed" error
-            String url = "jdbc:mysql://localhost:3306/funkymonkey?useSSL=false&allowPublicKeyRetrieval=true";
+            String url = "jdbc:mysql://localhost:3306/funkymonkey11?useSSL=false&allowPublicKeyRetrieval=true";
             String user = "root";
 
             String password = "funkymonkey123"; // Your MySQL root password
