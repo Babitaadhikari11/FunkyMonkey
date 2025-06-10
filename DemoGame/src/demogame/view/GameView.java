@@ -1,7 +1,6 @@
 package demogame.view;
 
 import javax.swing.*;
-import java.awt.*;
 
 public class GameView extends JFrame {
     public GameView() {
@@ -11,8 +10,9 @@ public class GameView extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
 
-        JLabel label = new JLabel("Game Loaded! Ready to Play!", SwingConstants.CENTER);
-        label.setFont(new Font("Comic Sans MS", Font.BOLD, 32));
-        add(label, BorderLayout.CENTER);
+        // ⬅️ This is the critical line!
+        add(new GamePanel());
+
+        // Optional: setVisible(false); here if you want to delay showing
     }
 }
