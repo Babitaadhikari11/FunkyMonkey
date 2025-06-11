@@ -4,7 +4,6 @@ import demogame.dao.UserDao;
 import demogame.model.UserData;
 import demogame.view.LoginView;
 import demogame.view.SignUpView;
-import javax.swing.JOptionPane;
 import java.awt.event.*;
 
 public class SignupController {
@@ -29,15 +28,18 @@ public class SignupController {
         String username = view.getUsername();
         String email = view.getEmail();
         String password = view.getPassword();
-       
+        String confirmPassword = view.getConfirmPassword();
 
         // Validate inputs
-        if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
+        if (username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             view.showError("All fields are required.");
             return;
         }
 
-        
+        if (!password.equals(confirmPassword)) {
+            view.showError("Passwords do not match.");
+            return;
+        }
 
         UserData user = new UserData(username, email, password);
         if (userDAO.register(user)) {
