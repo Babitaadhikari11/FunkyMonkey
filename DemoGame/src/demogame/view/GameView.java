@@ -1,5 +1,8 @@
 package demogame.view;
 
+
+import demogame.controller.GameController;
+import demogame.model.GameOverListener;
 import java.awt.*;
 import javax.swing.*;
 
@@ -50,4 +53,19 @@ public class GameView extends JFrame {
     public int getFinalScore() {
         return currentScore;
     }
+
+    private GameController gameController;
+
+    public GameView(GameController controller) {
+        this.gameController = controller;
+        // Set the listener
+        gameController.setGameOverListener(new GameOverListener() {
+            @Override
+            public void onGameOver() {
+                // Handle game over logic (e.g., show game over screen)
+                System.out.println("Game Over!");
+                // Add UI updates or other actions here
+            }
+        });
+}
 }
