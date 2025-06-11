@@ -1,20 +1,48 @@
 package demogame.controller;
 
+import demogame.dao.ScoreDao;
+import demogame.util.DatabaseConnection;
 import demogame.view.GameView;
 import demogame.view.LoadingView;
 import demogame.view.MenuView;
+import java.sql.Connection;
+import java.sql.SQLException;
 import javax.swing.*;
 
 public class GameController {
     private GameView gameView;
+    private int userId;
+    private ScoreDao scoreDao;
 
+    // Default constructor (used for testing/demo)
     public GameController() {
+        initDatabase();
         showMenu();
     }
 
+    // Overloaded constructor with GameView (not used, placeholder)
     public GameController(GameView gameView2) {
-        //TODO Auto-generated constructor stub
+        this.gameView = gameView2;
+        initDatabase();
     }
+
+    // Overloaded constructor to receive logged-in user ID
+    public GameController(int userId) {
+        this.userId = userId;
+        initDatabase();
+        showMenu();
+    }
+
+   private void initDatabase() {
+    try {
+        Connection conn = DatabaseConnection.getConnection();
+        this.scoreDao = new ScoreDao(conn);
+    } catch (SQLException e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(null, "Database connection failed!", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+}
+
 
     private void showMenu() {
         MenuView menuView = new MenuView("Player");
@@ -33,7 +61,6 @@ public class GameController {
         LoadingView loadingView = new LoadingView();
         loadingView.setVisible(true);
 
-        // Simulate loading with a timer
         Timer loadingTimer = new Timer(100, null);
         loadingTimer.addActionListener(new AbstractAction() {
             int progress = 0;
@@ -54,11 +81,25 @@ public class GameController {
         loadingTimer.start();
     }
 
-    private void launchGame() {
-        gameView = new GameView();
-        gameView.setVisible(true);
+ private void launchGame() {
+    gameView = new GameView();
+    gameView.setVisible(true);
 
-        // You can now add more game logic using this controller
-        // e.g., managing input, updating scores, etc.
+    // At the end of the game, call this:
+    int finalScore = gameView.getFinalScore();
+    saveScore(finalScore);
+}
+
+
+    // Save score to DB
+    public void saveScore(int score) {
+    if (scoreDao != null) {
+            boolean success = scoreDao.insertScore(userId, score);
+            if (success) {
+                System.out.println("✅ Score saved successfully!");
+            } else {
+                System.err.println("❌ Failed to save score.");
+            }
+        }
     }
 }
