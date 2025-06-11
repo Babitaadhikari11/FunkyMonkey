@@ -1,6 +1,7 @@
 package demogame.controller;
 
 import demogame.dao.ScoreDao;
+import demogame.model.GameOverListener;
 import demogame.util.DatabaseConnection;
 import demogame.view.GameView;
 import demogame.view.LoadingView;
@@ -84,12 +85,29 @@ public class GameController {
  private void launchGame() {
     gameView = new GameView();
     gameView.setVisible(true);
-
+    
     // At the end of the game, call this:
     int finalScore = gameView.getFinalScore();
     saveScore(finalScore);
 }
 
+
+private GameOverListener gameOverListener;
+
+    public void setGameOverListener(Object object) {
+        if (object instanceof GameOverListener) {
+            this.gameOverListener = (GameOverListener) object;
+        } else {
+            throw new IllegalArgumentException("Parameter must implement GameOverListener");
+        }
+    }
+
+    // Method to trigger game over
+    public void endGame() {
+        if (gameOverListener != null) {
+            gameOverListener.onGameOver();
+        }
+    }
 
     // Save score to DB
     public void saveScore(int score) {
