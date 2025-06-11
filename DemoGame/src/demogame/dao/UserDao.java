@@ -106,4 +106,20 @@ public class UserDao {
     public String getErrorMessage() {
         return errorMessage;
     }
+
+    // ✅ NEW METHOD TO SAVE SCORE
+    public boolean saveScore(String username, int score) {
+        String query = "INSERT INTO scores (username, score) VALUES (?, ?)";
+
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, username);
+            stmt.setInt(2, score);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.err.println("Failed to save score: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
