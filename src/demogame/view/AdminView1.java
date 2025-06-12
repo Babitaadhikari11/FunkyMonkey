@@ -18,6 +18,7 @@ public class AdminView1 extends javax.swing.JFrame {
      */
     public AdminView1() {
         initComponents();
+        setMinimumSize(new java.awt.Dimension(800, 600)); // Added to set window size
     }
 
     /**
