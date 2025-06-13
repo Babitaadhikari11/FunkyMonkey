@@ -2,23 +2,25 @@ package demogame.controller;
 
 import demogame.dao.UserDao;
 import demogame.model.UserData;
+import demogame.view.GameView;
 import demogame.view.LoginView;
-import demogame.view.SignUpView;
 import demogame.view.MenuView;
-import java.awt.event.*;
+import demogame.view.SignUpView;
+import javax.swing.SwingUtilities;
 
 public class LoginController {
     private UserDao userDAO;
     private LoginView view;
 
+    // ✅ New: Field to store logged-in user's ID
+    private int loggedInUserId = -1;
+
     public LoginController(LoginView view) {
         this.view = view;
         this.userDAO = new UserDao();
 
-        // Add action listener for login button
         view.getLoginButton().addActionListener(e -> handleLogin());
 
-        // Add mouse listener for create account link
         view.getCreateAccountLink().addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
@@ -33,7 +35,7 @@ public class LoginController {
     private void handleLogin() {
         String username = view.getUsername();
         String password = view.getPassword();
-// validation
+
         if (username.isEmpty() || password.isEmpty()) {
             view.showError("Username and password cannot be empty.");
             return;
@@ -42,13 +44,30 @@ public class LoginController {
         UserData user = userDAO.authenticate(username, password);
         if (user != null) {
             view.showSuccess("Login successful! Welcome, " + username + "!");
+
+            // ✅ New: store logged-in user's ID
+            this.loggedInUserId = user.getId();  // Assumes UserData has getId()
+
             view.setVisible(false);
-            //  navigation to MenuPanel; 
             MenuView menuView = new MenuView(username);
-            new MenuController(menuView, user); //PASSING USER OBJECT
+            new MenuController(menuView, user); // Passing user object
             menuView.setVisible(true);
         } else {
             view.showError(userDAO.getErrorMessage());
         }
+    }
+
+    private void launchGame() {
+        SwingUtilities.invokeLater(() -> {
+            view.dispose();
+            GameView gameView = new GameView();
+            new GameController(gameView);
+            gameView.setVisible(true);
+        });
+    }
+
+    // ✅ New: Getter for logged-in user ID
+    public int getLoggedInUserId() {
+        return loggedInUserId;
     }
 }

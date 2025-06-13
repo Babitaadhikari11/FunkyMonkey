@@ -1,11 +1,8 @@
 package demogame.view;
 
 import demogame.util.RoundedPanel;
-
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-
+import javax.swing.*;
 public class LoginView extends JFrame {
     public JTextField usernameField = new JTextField();
     public JPasswordField passwordField = new JPasswordField();
