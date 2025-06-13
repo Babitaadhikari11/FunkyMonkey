@@ -1,6 +1,6 @@
 package demogame.view;
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
 
 public class LoadingView  extends JFrame{
     private JLabel logoLabel;
@@ -105,3 +105,4 @@ public class LoadingView  extends JFrame{
     
     
 }
+ 
