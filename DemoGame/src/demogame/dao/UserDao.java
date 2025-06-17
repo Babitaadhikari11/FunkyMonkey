@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList; 
+import java.util.List;
 
 public class UserDao {
     private Connection connection;
@@ -122,4 +124,35 @@ public class UserDao {
             return false;
         }
     }
+
+    /**
+ * Retrieves a list of all users from the database.
+ * @return A list of UserData objects.
+ */
+public List<UserData> getAllUsers() {
+    List<UserData> userList = new ArrayList<>();
+    String sql = "SELECT * FROM users ORDER BY username"; // Get all users, sorted by name
+
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql);
+         ResultSet rs = pstmt.executeQuery()) {
+
+        while (rs.next()) {
+            UserData user = new UserData(
+                rs.getInt("id"),
+                rs.getString("username"),
+                rs.getString("email"),
+                rs.getString("password")
+            );
+            userList.add(user);
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace(); // Or handle with your logger
+    }
+    return userList;
+}
+
+
+
 }
