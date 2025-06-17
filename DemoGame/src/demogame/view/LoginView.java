@@ -55,6 +55,12 @@ public class LoginView extends JFrame {
             }
         });
 
+        forgotPasswordLink.setForeground(Color.BLUE);
+        forgotPasswordLink.setFont(new Font("Comic Sans MS", Font.PLAIN, 14));
+        forgotPasswordLink.setBounds(240, 260, 140, 30);
+        forgotPasswordLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        loginPanel.add(forgotPasswordLink);
+
         loginButton.setBounds(40, 310, 320, 50);
         loginButton.setBackground(Color.RED);
         loginButton.setForeground(Color.WHITE);
@@ -73,12 +79,6 @@ public class LoginView extends JFrame {
         createAccountLink.setBounds(220, 380, 140, 30);
         createAccountLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         loginPanel.add(createAccountLink);
-
-        forgotPasswordLink.setForeground(Color.BLUE);
-        forgotPasswordLink.setFont(new Font("Comic Sans MS", Font.PLAIN, 16));
-        forgotPasswordLink.setBounds(40, 410, 140, 30);
-        forgotPasswordLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        loginPanel.add(forgotPasswordLink);
     }
 
     private void addLabeledField(JPanel panel, String label, JComponent field, int y) {
