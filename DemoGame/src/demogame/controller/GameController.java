@@ -37,7 +37,7 @@ public class GameController {
    private void initDatabase() {
     try {
         Connection conn = DatabaseConnection.getConnection();
-        this.scoreDao = new ScoreDao(conn);
+        this.scoreDao = new ScoreDao();
     } catch (SQLException e) {
         e.printStackTrace();
         JOptionPane.showMessageDialog(null, "Database connection failed!", "Error", JOptionPane.ERROR_MESSAGE);
