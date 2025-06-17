@@ -22,6 +22,7 @@ public class LoginView extends JFrame {
         JLayeredPane layeredPane = new JLayeredPane();
         getContentPane().add(layeredPane);
 
+        // Background image
         ImageIcon bgIcon = new ImageIcon(getClass().getResource("/resources/Background.jpg"));
         Image scaled = bgIcon.getImage().getScaledInstance(1200, 800, Image.SCALE_SMOOTH);
         JLabel background = new JLabel(new ImageIcon(scaled));
@@ -43,9 +44,15 @@ public class LoginView extends JFrame {
         addLabeledField(loginPanel, "Username:", usernameField, 90);
         addLabeledField(loginPanel, "Password:", passwordField, 180);
 
-        showPasswordCheck.setBounds(40, 260, 200, 30);
-        showPasswordCheck.setFont(new Font("Comic Sans MS", Font.PLAIN, 16));
+        showPasswordCheck.setBounds(40, 260, 150, 30);
+        showPasswordCheck.setFont(new Font("Comic Sans MS", Font.PLAIN, 14));
         loginPanel.add(showPasswordCheck);
+
+        forgotPasswordLink.setBounds(230, 260, 150, 30);
+        forgotPasswordLink.setFont(new Font("Comic Sans MS", Font.PLAIN, 14));
+        forgotPasswordLink.setForeground(Color.BLUE);
+        forgotPasswordLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        loginPanel.add(forgotPasswordLink);
 
         showPasswordCheck.addActionListener(e -> {
             if (showPasswordCheck.isSelected()) {
@@ -54,12 +61,6 @@ public class LoginView extends JFrame {
                 passwordField.setEchoChar('•');
             }
         });
-
-        forgotPasswordLink.setForeground(Color.BLUE);
-        forgotPasswordLink.setFont(new Font("Comic Sans MS", Font.PLAIN, 14));
-        forgotPasswordLink.setBounds(240, 260, 140, 30);
-        forgotPasswordLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        loginPanel.add(forgotPasswordLink);
 
         loginButton.setBounds(40, 310, 320, 50);
         loginButton.setBackground(Color.RED);
@@ -71,11 +72,11 @@ public class LoginView extends JFrame {
 
         JLabel question = new JLabel("Don't have an account?");
         question.setBounds(40, 380, 180, 30);
-        question.setFont(new Font("Comic Sans MS", Font.PLAIN, 16));
+        question.setFont(new Font("Comic Sans MS", Font.PLAIN, 14));
         loginPanel.add(question);
 
         createAccountLink.setForeground(Color.BLUE);
-        createAccountLink.setFont(new Font("Comic Sans MS", Font.PLAIN, 16));
+        createAccountLink.setFont(new Font("Comic Sans MS", Font.PLAIN, 14));
         createAccountLink.setBounds(220, 380, 140, 30);
         createAccountLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         loginPanel.add(createAccountLink);
@@ -92,7 +93,7 @@ public class LoginView extends JFrame {
         panel.add(field);
     }
 
-    // getters
+    // Getters
     public String getUsername() {
         return usernameField.getText();
     }
