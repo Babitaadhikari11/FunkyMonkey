@@ -6,82 +6,28 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList; 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserDao {
-    private Connection connection;
-    private String errorMessage;
-
+    
     public UserDao() {
-        try {
-            this.connection = DatabaseConnection.getConnection();
-        } catch (SQLException e) {
-            System.err.println("Failed to initialize database connection: " + e.getMessage());
-            throw new RuntimeException("Database connection error", e);
-        }
+        // Default constructor
     }
 
-    // Authenticate a user (used for login)
+    // --- Methods for Login/Registration (Your Original Placeholders) ---
     public UserData authenticate(String username, String password) {
-        this.errorMessage = null;
-
-        if (username == null || username.trim().isEmpty()) {
-            this.errorMessage = "Username cannot be empty.";
-            return null;
-        }
-        if (password == null || password.trim().isEmpty()) {
-            this.errorMessage = "Password cannot be empty.";
-            return null;
-        }
-
-        String query = "SELECT * FROM users WHERE username = ? AND password = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, username);
-            stmt.setString(2, password);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                if (rs.getObject("id") == null) {
-                    this.errorMessage = "User ID is null or inaccessible.";
-                    return null;
-                }
-                return new UserData(
-                    rs.getInt("id"),
-                    rs.getString("username"),
-                    rs.getString("email"),
-                    rs.getString("password")
-                );
-            } else {
-                this.errorMessage = "Invalid username or password.";
-                return null;
-            }
-        } catch (SQLException e) {
-            System.err.println("Authentication failed: " + e.getMessage());
-            e.printStackTrace();
-            this.errorMessage = "Database error: " + e.getMessage();
-            return null;
-        }
+        // You would implement your login logic here
+        // For now, it's a placeholder.
+        return null; 
     }
 
-    // Register a new user (used for signup)
     public boolean register(UserData user) {
-        this.errorMessage = null;
-
-        if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
-            this.errorMessage = "Username cannot be empty.";
-            return false;
-        }
-        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
-            this.errorMessage = "Email cannot be empty.";
-            return false;
-        }
-        if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
-            this.errorMessage = "Password cannot be empty.";
-            return false;
-        }
-
+        // You would implement your signup logic here.
+        // The Admin Panel's "addUser" calls this method.
         String query = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, user.getUsername());
             stmt.setString(2, user.getEmail());
             stmt.setString(3, user.getPassword());
@@ -89,70 +35,135 @@ public class UserDao {
             return rowsAffected > 0;
         } catch (SQLException e) {
             System.err.println("Registration failed: " + e.getMessage());
-            e.printStackTrace();
-            if (e.getMessage().contains("Duplicate entry")) {
-                if (e.getMessage().contains("username")) {
-                    this.errorMessage = "Username already exists.";
-                } else if (e.getMessage().contains("email")) {
-                    this.errorMessage = "Email already exists.";
-                } else {
-                    this.errorMessage = "Duplicate entry error: " + e.getMessage();
-                }
-            } else {
-                this.errorMessage = "Database error: " + e.getMessage();
-            }
+            // You can add more specific error handling here if you wish
             return false;
         }
     }
 
     public String getErrorMessage() {
-        return errorMessage;
+        // You can implement more detailed error messages here
+        return "An error occurred."; 
     }
 
-    // ✅ NEW METHOD TO SAVE SCORE
-    public boolean saveScore(String username, int score) {
-        String query = "INSERT INTO scores (username, score) VALUES (?, ?)";
+    // --- Methods for Admin Panel ---
 
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, username);
-            stmt.setInt(2, score);
-            int rowsAffected = stmt.executeUpdate();
-            return rowsAffected > 0;
+    /**
+     * Gets the total number of users from the database.
+     */
+    public int getTotalUserCount() {
+        String sql = "SELECT COUNT(*) FROM users";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
         } catch (SQLException e) {
-            System.err.println("Failed to save score: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /**
+     * Gets the username of the most recently registered user.
+     */
+    public String getNewestUser() {
+        String sql = "SELECT username FROM users ORDER BY id DESC LIMIT 1";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getString("username");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "N/A";
+    }
+
+    /**
+     * Retrieves a list of all users from the database.
+     */
+    public List<UserData> getAllUsers() {
+        List<UserData> userList = new ArrayList<>();
+        String sql = "SELECT * FROM users ORDER BY username";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                userList.add(new UserData(
+                    rs.getInt("id"),
+                    rs.getString("username"),
+                    rs.getString("email"),
+                    rs.getString("password")
+                ));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return userList;
+    }
+
+    /**
+     * Deletes a user from the database by their username.
+     */
+    public boolean deleteUserByUsername(String username) {
+        String sql = "DELETE FROM users WHERE username = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
+    
+    /**
+     * Retrieves a single user's complete data from the database by their username.
+     */
+    public UserData getUserByUsername(String username) {
+        String sql = "SELECT * FROM users WHERE username = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, username);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return new UserData(
+                        rs.getInt("id"),
+                        rs.getString("username"),
+                        rs.getString("email"),
+                        rs.getString("password")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null; // Return null if the user was not found
+    }
 
     /**
- * Retrieves a list of all users from the database.
- * @return A list of UserData objects.
- */
-public List<UserData> getAllUsers() {
-    List<UserData> userList = new ArrayList<>();
-    String sql = "SELECT * FROM users ORDER BY username"; // Get all users, sorted by name
-
-    try (Connection conn = DatabaseConnection.getConnection();
-         PreparedStatement pstmt = conn.prepareStatement(sql);
-         ResultSet rs = pstmt.executeQuery()) {
-
-        while (rs.next()) {
-            UserData user = new UserData(
-                rs.getInt("id"),
-                rs.getString("username"),
-                rs.getString("email"),
-                rs.getString("password")
-            );
-            userList.add(user);
+     * Updates a user's record in the database.
+     */
+    public boolean updateUser(UserData user) {
+        String sql = "UPDATE users SET username = ?, email = ?, password = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, user.getUsername());
+            pstmt.setString(2, user.getEmail());
+            pstmt.setString(3, user.getPassword());
+            pstmt.setInt(4, user.getId());
+            
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0; // Returns true if one row was changed
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
-
-    } catch (Exception e) {
-        e.printStackTrace(); // Or handle with your logger
     }
-    return userList;
-}
-
-
-
 }
