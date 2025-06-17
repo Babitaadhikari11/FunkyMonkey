@@ -3,6 +3,8 @@ package demogame.view;
 import demogame.util.RoundedPanel;
 import java.awt.*;
 import javax.swing.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class LoginView extends JFrame {
     public JTextField usernameField = new JTextField();
@@ -22,7 +24,6 @@ public class LoginView extends JFrame {
         JLayeredPane layeredPane = new JLayeredPane();
         getContentPane().add(layeredPane);
 
-        // Background image
         ImageIcon bgIcon = new ImageIcon(getClass().getResource("/resources/Background.jpg"));
         Image scaled = bgIcon.getImage().getScaledInstance(1200, 800, Image.SCALE_SMOOTH);
         JLabel background = new JLabel(new ImageIcon(scaled));
@@ -44,6 +45,8 @@ public class LoginView extends JFrame {
         addLabeledField(loginPanel, "Username:", usernameField, 90);
         addLabeledField(loginPanel, "Password:", passwordField, 180);
 
+        passwordField.setEchoChar('•');
+
         showPasswordCheck.setBounds(40, 260, 150, 30);
         showPasswordCheck.setFont(new Font("Comic Sans MS", Font.PLAIN, 14));
         loginPanel.add(showPasswordCheck);
@@ -53,6 +56,9 @@ public class LoginView extends JFrame {
         forgotPasswordLink.setForeground(Color.BLUE);
         forgotPasswordLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         loginPanel.add(forgotPasswordLink);
+
+        // Remove this listener from LoginView; will be handled in controller
+        // forgotPasswordLink.addMouseListener(...) — removed here
 
         showPasswordCheck.addActionListener(e -> {
             if (showPasswordCheck.isSelected()) {
@@ -80,6 +86,8 @@ public class LoginView extends JFrame {
         createAccountLink.setBounds(220, 380, 140, 30);
         createAccountLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         loginPanel.add(createAccountLink);
+
+        // Similarly, handle createAccountLink in controller
     }
 
     private void addLabeledField(JPanel panel, String label, JComponent field, int y) {
