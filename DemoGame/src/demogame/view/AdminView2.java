@@ -340,7 +340,6 @@ public class AdminView2 extends javax.swing.JFrame {
         // Correct way to get password from JPasswordField
         String password = new String(jPasswordField1.getPassword());
 
-        // Call the addUser method in your controller
         this.adminController.addUser(name, username, email, password);
 
         // Optional: Clear the text fields after adding
