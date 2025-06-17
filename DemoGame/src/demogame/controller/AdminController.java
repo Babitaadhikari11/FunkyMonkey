@@ -1,13 +1,12 @@
 package demogame.controller;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.JFrame;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import demogame.view.AdminView1;
 import demogame.view.AdminView2;
 import demogame.view.AdminView3;
+import java.awt.event.ActionEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFrame;
 
 public class AdminController {
     private static final Logger LOGGER = Logger.getLogger(AdminController.class.getName());
