@@ -7,5 +7,12 @@ public class MonkeyState {
     public static final int[] JUMPING_FRAMES = {9, 10, 11};
     public static final int[] FALLING_FRAMES = {12, 13, 14};
     public static final int VICTORY_FRAME = 16;
+     public enum State {
+        IDLE,
+        WALKING,
+        JUMPING,
+        FALLING,
+        VICTORY
+    }
     
 }
