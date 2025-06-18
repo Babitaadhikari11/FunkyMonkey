@@ -95,6 +95,11 @@ public class Monkey {
         velocityX = targetSpeed;
         facingRight = false;
     }
+    public void moveRight() {
+        float targetSpeed = isOnGround ? MOVE_SPEED : MOVE_SPEED * AIR_CONTROL;
+        velocityX = targetSpeed;
+        facingRight = true;
+    }
     // Getters
     public int getX() { return Math.round(x); }
     public int getY() { return Math.round(y); }
