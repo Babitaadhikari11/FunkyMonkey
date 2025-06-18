@@ -1,5 +1,5 @@
 package demogame.model;
 
-public class GameState {
+public class MonkeyState {
     
 }
