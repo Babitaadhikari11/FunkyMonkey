@@ -79,6 +79,17 @@ public class Monkey {
             }
         }
     }
+     public void jump() {
+        if (isOnGround) {
+            velocityY = JUMP_FORCE;
+            isJumping = true;
+            isOnGround = false;
+            // Add forward momentum if moving
+            if (velocityX > 0) {
+                velocityX = JUMP_MOVE_SPEED; // Faster forward movement during jump
+            }
+        }
+    }
     // Getters
     public int getX() { return Math.round(x); }
     public int getY() { return Math.round(y); }
