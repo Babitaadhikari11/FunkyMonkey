@@ -126,15 +126,15 @@ public class AdminController {
     private void setupNavigation() {
         dashboardFrame.jButton1.addActionListener(e -> navigateToDashboard());
         userFrame.jButton1.addActionListener(e -> navigateToDashboard());
-        // notificationFrame.jButton1.addActionListener(e -> navigateToDashboard()); // Assuming AdminView3 has jButton1
+        notificationFrame.jButton1.addActionListener(e -> navigateToDashboard()); // Assuming AdminView3 has jButton1
 
         dashboardFrame.jButton2.addActionListener(e -> navigateToUser());
         userFrame.jButton2.addActionListener(e -> navigateToUser());
-        // notificationFrame.jButton2.addActionListener(e -> navigateToUser()); // Assuming AdminView3 has jButton2
+        notificationFrame.jButton2.addActionListener(e -> navigateToUser()); // Assuming AdminView3 has jButton2
 
         dashboardFrame.jButton3.addActionListener(e -> navigateToNotification());
         userFrame.jButton3.addActionListener(e -> navigateToNotification());
-        // notificationFrame.jButton3.addActionListener(e -> navigateToNotification()); // Assuming AdminView3 has jButton3
+        notificationFrame.jButton3.addActionListener(e -> navigateToNotification()); // Assuming AdminView3 has jButton3
     }
 
     private void navigateToDashboard() { showDashboard(); }
