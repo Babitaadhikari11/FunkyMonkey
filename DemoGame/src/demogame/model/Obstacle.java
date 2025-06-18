@@ -82,6 +82,43 @@ public class Obstacle {
             y + COLLISION_INSET
         );
     }
+     public boolean checkCollision(Monkey monkey) {
+    if (!isActive || wasJumpedOver) return false;
+
+    // Create tighter collision bounds
+    Rectangle monkeyBounds = new Rectangle(
+        monkey.getX() + 20,        // Smaller inset
+        monkey.getY() + 20,        // Smaller inset
+        MONKEY_DEFAULT_SIZE - 40,   // Tighter collision box
+        MONKEY_DEFAULT_SIZE - 40
+    );
+
+    // Create obstacle collision bounds
+    Rectangle obstacleHitbox = new Rectangle(
+        x + 10,                    // Smaller inset
+        y + 10,                    // Smaller inset
+        width - 20,                // Tighter collision box
+        height - 20
+    );
+
+    // Debug output
+    System.out.println("Monkey Y: " + monkey.getY() + ", Obstacle Y: " + y);
+    System.out.println("Jumping: " + monkey.isJumping());
+
+    // Check for successful jump
+    if (monkey.isJumping()) {
+        // More forgiving jump detection
+        boolean isAboveObstacle = monkey.getY() + MONKEY_DEFAULT_SIZE - 40 < y;
+        boolean hasForwardMomentum = monkey.getVelocityX() > 0;
+        
+        if (isAboveObstacle && hasForwardMomentum) {
+            wasJumpedOver = true;
+            return false;
+        }
+    }
+
+    return obstacleHitbox.intersects(monkeyBounds);
+}
      // Getters
     public int getX() { return x; }
     public int getY() { return y; }
