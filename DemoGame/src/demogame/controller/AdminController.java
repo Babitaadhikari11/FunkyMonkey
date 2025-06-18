@@ -6,6 +6,7 @@ import demogame.model.UserData;
 import demogame.view.AdminView1;
 import demogame.view.AdminView2;
 import demogame.view.AdminView3;
+import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,9 +28,8 @@ public class AdminController {
         this.userDao = new UserDao();
         this.scoreDao = new ScoreDao();
         
-        // Pass 'this' controller to any view that needs to call its methods
-        this.dashboardFrame = new AdminView1(); 
-        this.userFrame = new AdminView2(this); // Pass controller to AdminView2
+        this.dashboardFrame = new AdminView1();
+        this.userFrame = new AdminView2(this); 
         this.notificationFrame = new AdminView3();
 
         configureFrame(dashboardFrame, "Dashboard");
@@ -41,12 +41,13 @@ public class AdminController {
         showDashboard();
     }
 
-    // --- Public methods for AdminView2 to call ---
-    
     public UserData getUserDetails(String username) {
         return userDao.getUserByUsername(username);
     }
 
+    /**
+     * CORRECTED: Now preserves the user's original role when updating.
+     */
     public void updateUser(String originalUsername, String newUsername, String newEmail, String newPassword) {
         UserData originalUser = userDao.getUserByUsername(originalUsername);
         if (originalUser == null) {
@@ -54,19 +55,25 @@ public class AdminController {
             return;
         }
 
-        UserData updatedUser = new UserData(originalUser.getId(), newUsername, newEmail, newPassword);
+        // Create the updated user, passing the original role to preserve it.
+        UserData updatedUser = new UserData(originalUser.getId(), newUsername, newEmail, newPassword, originalUser.getRole());
         
         boolean success = userDao.updateUser(updatedUser);
         if (success) {
             JOptionPane.showMessageDialog(userFrame, "User updated successfully!");
-            loadAndDisplayUsers(); // Refresh the list
+            loadAndDisplayUsers();
         } else {
             JOptionPane.showMessageDialog(userFrame, "Failed to update user.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
     
+    /**
+     * CORRECTED: Now sets the default role for a new user.
+     */
     public void addUser(String name, String username, String email, String password) {
-        UserData newUser = new UserData(0, username, email, password);
+        // Create the new user with the default role of 'player'.
+        UserData newUser = new UserData(0, username, email, password, "player");
+        
         boolean success = userDao.register(newUser);
         if (success) {
             JOptionPane.showMessageDialog(userFrame, "User added successfully!");
@@ -92,8 +99,6 @@ public class AdminController {
             }
         }
     }
-
-    // --- Private helper methods ---
 
     private void loadDashboardData() {
         try {
@@ -124,22 +129,22 @@ public class AdminController {
     }
 
     private void setupNavigation() {
-        dashboardFrame.jButton1.addActionListener(e -> navigateToDashboard());
-        userFrame.jButton1.addActionListener(e -> navigateToDashboard());
-        notificationFrame.jButton1.addActionListener(e -> navigateToDashboard()); // Assuming AdminView3 has jButton1
+        dashboardFrame.jButton1.addActionListener(e -> navigateToDashboard(e));
+        userFrame.jButton1.addActionListener(e -> navigateToDashboard(e));
+        notificationFrame.jButton1.addActionListener(e -> navigateToDashboard(e));
 
-        dashboardFrame.jButton2.addActionListener(e -> navigateToUser());
-        userFrame.jButton2.addActionListener(e -> navigateToUser());
-        notificationFrame.jButton2.addActionListener(e -> navigateToUser()); // Assuming AdminView3 has jButton2
+        dashboardFrame.jButton2.addActionListener(e -> navigateToUser(e));
+        userFrame.jButton2.addActionListener(e -> navigateToUser(e));
+        notificationFrame.jButton2.addActionListener(e -> navigateToUser(e));
 
-        dashboardFrame.jButton3.addActionListener(e -> navigateToNotification());
-        userFrame.jButton3.addActionListener(e -> navigateToNotification());
-        notificationFrame.jButton3.addActionListener(e -> navigateToNotification()); // Assuming AdminView3 has jButton3
+        dashboardFrame.jButton3.addActionListener(e -> navigateToNotification(e));
+        userFrame.jButton3.addActionListener(e -> navigateToNotification(e));
+        notificationFrame.jButton3.addActionListener(e -> navigateToNotification(e));
     }
 
-    private void navigateToDashboard() { showDashboard(); }
-    private void navigateToUser() { loadAndDisplayUsers(); showUser(); }
-    private void navigateToNotification() { showNotification(); }
+    private void navigateToDashboard(ActionEvent e) { showDashboard(); }
+    private void navigateToUser(ActionEvent e) { loadAndDisplayUsers(); showUser(); }
+    private void navigateToNotification(ActionEvent e) { showNotification(); }
     private void showDashboard() { hideAllFrames(); dashboardFrame.setVisible(true); }
     private void showUser() { hideAllFrames(); userFrame.setVisible(true); }
     private void showNotification() { hideAllFrames(); notificationFrame.setVisible(true); }
@@ -159,6 +164,4 @@ public class AdminController {
             }
         });
     }
-
-    
 }
