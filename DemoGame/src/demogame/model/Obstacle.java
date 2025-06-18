@@ -66,6 +66,15 @@ public class Obstacle {
             height - (COLLISION_INSET * 2)
         );
     }
+
+    public void update() {
+        if (isActive && x > -width) {
+            x -= speed;
+            updateBounds();
+        } else {
+            isActive = false;
+        }
+    }
      // Getters
     public int getX() { return x; }
     public int getY() { return y; }
