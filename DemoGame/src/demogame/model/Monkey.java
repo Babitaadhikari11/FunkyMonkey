@@ -1,6 +1,16 @@
 package demogame.model;
 import java.awt.Rectangle;
 public class Monkey {
+    // Physics constants
+    private static final float JUMP_FORCE = -18.0f;
+    private static final float GRAVITY = 0.6f;
+    // private static final float MAX_FALL_SPEED = 12.0f;
+    private static final float MOVE_SPEED = 0.5f;
+    private static final float AIR_CONTROL = 0.7f;
+    private static final float JUMP_MOVE_SPEED = 0.8f; // Faster forward movement while jumping
+    private static final float MAX_FALL_SPEED = 8.0f;
+    private static final float FORWARD_JUMP_FORCE = -22.0f; // Extra boost when jumping forward
+    private static final float HORIZONTAL_DAMPING = 0.99f; // Reduced horizontal slowdown
      // Position and velocity
     private float x;
     private float y;
