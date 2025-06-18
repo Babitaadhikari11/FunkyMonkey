@@ -119,6 +119,28 @@ public class Obstacle {
 
     return obstacleHitbox.intersects(monkeyBounds);
 }
+    private Rectangle createMonkeyCollisionBounds(Monkey monkey) {
+        int inset = 30;
+        return new Rectangle(
+            monkey.getX() + inset,
+            monkey.getY() + inset,
+            MONKEY_DEFAULT_SIZE - (inset * 2),
+            MONKEY_DEFAULT_SIZE - (inset * 2)
+        );
+    }
+
+    private boolean isApproachingObstacle(Monkey monkey) {
+        int distanceToObstacle = x - (monkey.getX() + MONKEY_DEFAULT_SIZE);
+        return distanceToObstacle > 0 && distanceToObstacle < 200;
+    }
+
+    private boolean isInCollisionRange(Monkey monkey) {
+        int monkeyRight = monkey.getX() + MONKEY_DEFAULT_SIZE;
+        int obstacleLeft = x;
+        int obstacleRight = x + width;
+        
+        return monkeyRight >= obstacleLeft && monkey.getX() <= obstacleRight;
+    }
      // Getters
     public int getX() { return x; }
     public int getY() { return y; }
