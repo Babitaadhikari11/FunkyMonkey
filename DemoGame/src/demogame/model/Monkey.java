@@ -90,6 +90,11 @@ public class Monkey {
             }
         }
     }
+    public void moveLeft() {
+        float targetSpeed = isOnGround ? -MOVE_SPEED : -MOVE_SPEED * AIR_CONTROL;
+        velocityX = targetSpeed;
+        facingRight = false;
+    }
     // Getters
     public int getX() { return Math.round(x); }
     public int getY() { return Math.round(y); }
