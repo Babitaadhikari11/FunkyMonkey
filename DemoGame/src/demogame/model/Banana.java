@@ -15,6 +15,10 @@ public class Banana {
         this.isCollected = false;
         this.bounds = new Rectangle(x, y, WIDTH, HEIGHT);
     }
+     public void update() {
+        x -= SPEED;
+        bounds.setLocation(x, y);
+    }
     // Getters and Setters
     public int getX() { return x; }
     public int getY() { return y; }
