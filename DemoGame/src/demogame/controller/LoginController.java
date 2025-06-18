@@ -6,13 +6,13 @@ import demogame.view.GameView;
 import demogame.view.LoginView;
 import demogame.view.MenuView;
 import demogame.view.SignUpView;
+import javax.swing.JOptionPane; // Added for pop-up messages
 import javax.swing.SwingUtilities;
 
 public class LoginController {
     private UserDao userDAO;
     private LoginView view;
 
-    // ✅ New: Field to store logged-in user's ID
     private int loggedInUserId = -1;
 
     public LoginController(LoginView view) {
@@ -42,17 +42,29 @@ public class LoginController {
         }
 
         UserData user = userDAO.authenticate(username, password);
+
+        // --- MODIFIED SECTION: Logic for role-based redirection ---
         if (user != null) {
-            view.showSuccess("Login successful! Welcome, " + username + "!");
-
-            // ✅ New: store logged-in user's ID
-            this.loggedInUserId = user.getId();  // Assumes UserData has getId()
-
-            view.setVisible(false);
-            MenuView menuView = new MenuView(username);
-            new MenuController(menuView, user); // Passing user object
-            menuView.setVisible(true);
+            // Login successful, now check the user's role
+            
+            if ("admin".equalsIgnoreCase(user.getRole())) {
+                // User is an ADMIN, open the Admin Dashboard
+                JOptionPane.showMessageDialog(view, "Welcome Admin, " + user.getUsername() + "!");
+                new AdminController(); // Launch the admin controller
+                view.dispose(); // Close the login window
+                
+            } else {
+                // User is a PLAYER, open the main game menu
+                view.showSuccess("Login successful! Welcome, " + username + "!");
+                this.loggedInUserId = user.getId();
+                view.setVisible(false);
+                MenuView menuView = new MenuView(username);
+                new MenuController(menuView, user);
+                menuView.setVisible(true);
+            }
+            
         } else {
+            // Login failed
             view.showError(userDAO.getErrorMessage());
         }
     }
@@ -66,7 +78,6 @@ public class LoginController {
         });
     }
 
-    // ✅ New: Getter for logged-in user ID
     public int getLoggedInUserId() {
         return loggedInUserId;
     }
