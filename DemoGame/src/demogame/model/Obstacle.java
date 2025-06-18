@@ -141,6 +141,13 @@ public class Obstacle {
         
         return monkeyRight >= obstacleLeft && monkey.getX() <= obstacleRight;
     }
+      public boolean shouldJump(Monkey monkey) {
+        if (!isActive || wasJumpedOver) return false;
+        
+        int distanceToObstacle = x - (monkey.getX() + MONKEY_DEFAULT_SIZE);
+        int optimalJumpDistance = width + 100;
+        return distanceToObstacle > 0 && distanceToObstacle < optimalJumpDistance;
+    }
      // Getters
     public int getX() { return x; }
     public int getY() { return y; }
