@@ -75,6 +75,13 @@ public class Obstacle {
             isActive = false;
         }
     }
+       private void updateBounds() {
+        bounds.setLocation(x, y);
+        collisionBounds.setLocation(
+            x + COLLISION_INSET,
+            y + COLLISION_INSET
+        );
+    }
      // Getters
     public int getX() { return x; }
     public int getY() { return y; }
