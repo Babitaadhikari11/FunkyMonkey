@@ -100,6 +100,15 @@ public class Monkey {
         velocityX = targetSpeed;
         facingRight = true;
     }
+     public void jumpForward() {
+        if (isOnGround) {
+            velocityY = FORWARD_JUMP_FORCE;
+            // velocityX = FORWARD_JUMP_FORCE;
+            isJumping = true;
+            isOnGround = false;
+            facingRight = true;
+        }
+    }
     // Getters
     public int getX() { return Math.round(x); }
     public int getY() { return Math.round(y); }
