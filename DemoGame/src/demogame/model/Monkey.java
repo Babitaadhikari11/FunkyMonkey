@@ -39,6 +39,46 @@ public class Monkey {
         this.currentFrame = 1;
         this.bounds = new Rectangle(startX, startY, 120, 120);
     }
+
+    public void update() {
+        // Apply gravity if not on ground
+        if (!isOnGround) {
+            velocityY += GRAVITY;
+            if (velocityY > MAX_FALL_SPEED) {
+                velocityY = MAX_FALL_SPEED;
+            }
+             // Maintain forward momentum during jump
+            if (isJumping && velocityX > 0) {
+                velocityX *= 0.99f; // Very slight decay of forward momentum
+            }
+        }
+
+        // Update position based on velocity
+        x += velocityX;
+        y += velocityY;
+
+        // Update collision bounds
+        // bounds.setLocation(Math.round(x), Math.round(y));
+
+        // Update animation
+       
+        updateAnimation();
+    }
+     private void updateAnimation() {
+        frameDelay++;
+        if (frameDelay >= FRAME_DELAY_LIMIT) {
+            frameDelay = 0;
+            
+            // Update frame based on state
+            if (!isOnGround) {
+                currentFrame = velocityY < 0 ? 8 : 11; // Jump or fall animation
+            } else if (Math.abs(velocityX) > 0.1f) {
+                currentFrame = ((currentFrame - 4 + 1) % 4) + 4; // Run animation
+            } else {
+                currentFrame = ((currentFrame - 1 + 1) % 3) + 1; // Idle animation
+            }
+        }
+    }
     // Getters
     public int getX() { return Math.round(x); }
     public int getY() { return Math.round(y); }
