@@ -68,7 +68,7 @@ public class AdminController {
     }
     
     /**
-     * CORRECTED: Now sets the default role for a new user.
+     * CORRECTED: Now sets the default role for a new user and refreshes the dashboard.
      */
     public void addUser(String name, String username, String email, String password) {
         // Create the new user with the default role of 'player'.
@@ -78,11 +78,15 @@ public class AdminController {
         if (success) {
             JOptionPane.showMessageDialog(userFrame, "User added successfully!");
             loadAndDisplayUsers();
+            loadDashboardData(); // Refreshes dashboard stats
         } else {
             JOptionPane.showMessageDialog(userFrame, "Error adding user: " + userDao.getErrorMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
+    /**
+     * CORRECTED: Now refreshes the dashboard after deleting a user.
+     */
     public void deleteUser(String username) {
         if (username == null || username.isEmpty()) {
             JOptionPane.showMessageDialog(userFrame, "Please select a user to delete.", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -94,6 +98,7 @@ public class AdminController {
             if (success) {
                 JOptionPane.showMessageDialog(userFrame, "User '" + username + "' has been deleted.");
                 loadAndDisplayUsers();
+                loadDashboardData(); // Refreshes dashboard stats
             } else {
                 JOptionPane.showMessageDialog(userFrame, "Error deleting user.", "Error", JOptionPane.ERROR_MESSAGE);
             }
