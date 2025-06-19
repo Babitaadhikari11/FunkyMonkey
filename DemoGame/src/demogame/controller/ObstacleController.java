@@ -27,5 +27,25 @@ public class ObstacleController {
         this.random = new Random();
         this.spawnTimer = 0;
     }
+    public void update() {
+        // Remove off-screen obstacles
+        obstacles.removeIf(obstacle -> 
+            obstacle.getX() + obstacle.getWidth() < 0);
+        
+        // Update existing obstacles
+        for (Obstacle obstacle : obstacles) {
+            obstacle.update();
+        }
+        
+        // Spawn new obstacles
+        spawnTimer++;
+        if (spawnTimer >= SPAWN_INTERVAL) {
+            if (canSpawnObstacle()) {
+                spawnObstacle();
+                spawnTimer = 0;
+            }
+        }
+    }
+
     
 }
