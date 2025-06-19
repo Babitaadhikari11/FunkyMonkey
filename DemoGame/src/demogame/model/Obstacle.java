@@ -1,6 +1,6 @@
 package demogame.model;
 import java.awt.Rectangle;
-import java.lang.reflect.Constructor;
+// import java.lang.reflect.Constructor;
 public class Obstacle {
     // Constants for obstacle properties
     private static final int SPEED = 3;
