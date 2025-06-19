@@ -6,118 +6,176 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDao {
-    private Connection connection;
     private String errorMessage;
 
     public UserDao() {
-        try {
-            this.connection = DatabaseConnection.getConnection();
-        } catch (SQLException e) {
-            System.err.println("Failed to initialize database connection: " + e.getMessage());
-            throw new RuntimeException("Database connection error", e);
-        }
+        // Default constructor
     }
 
-    // Authenticate a user (used for login)
+    /**
+     * Authenticates a user against the database.
+     * This method is now fully implemented.
+     * @param username The user's username.
+     * @param password The user's password.
+     * @return A UserData object if authentication is successful, otherwise null.
+     */
     public UserData authenticate(String username, String password) {
-        this.errorMessage = null;
-
-        if (username == null || username.trim().isEmpty()) {
-            this.errorMessage = "Username cannot be empty.";
-            return null;
-        }
-        if (password == null || password.trim().isEmpty()) {
-            this.errorMessage = "Password cannot be empty.";
-            return null;
-        }
-
-        String query = "SELECT * FROM users WHERE username = ? AND password = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, username);
-            stmt.setString(2, password);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                if (rs.getObject("id") == null) {
-                    this.errorMessage = "User ID is null or inaccessible.";
-                    return null;
+        this.errorMessage = null; // Reset error message
+        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, username);
+            pstmt.setString(2, password);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    // User found, create UserData object including the role
+                    return new UserData(
+                        rs.getInt("id"),
+                        rs.getString("username"),
+                        rs.getString("email"),
+                        rs.getString("password"),
+                        rs.getString("role") // Fetch the new 'role' column
+                    );
+                } else {
+                    this.errorMessage = "Invalid username or password.";
+                    return null; // No user found
                 }
-                return new UserData(
-                    rs.getInt("id"),
-                    rs.getString("username"),
-                    rs.getString("email"),
-                    rs.getString("password")
-                );
-            } else {
-                this.errorMessage = "Invalid username or password.";
-                return null;
             }
         } catch (SQLException e) {
-            System.err.println("Authentication failed: " + e.getMessage());
+            this.errorMessage = "Database error during authentication.";
             e.printStackTrace();
-            this.errorMessage = "Database error: " + e.getMessage();
             return null;
         }
     }
 
-    // Register a new user (used for signup)
     public boolean register(UserData user) {
         this.errorMessage = null;
-
-        if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
-            this.errorMessage = "Username cannot be empty.";
-            return false;
-        }
-        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
-            this.errorMessage = "Email cannot be empty.";
-            return false;
-        }
-        if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
-            this.errorMessage = "Password cannot be empty.";
-            return false;
-        }
-
-        String query = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        String query = "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, user.getUsername());
             stmt.setString(2, user.getEmail());
             stmt.setString(3, user.getPassword());
+            // When registering a new user, default them to the 'player' role
+            stmt.setString(4, user.getRole() != null ? user.getRole() : "player");
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
             System.err.println("Registration failed: " + e.getMessage());
-            e.printStackTrace();
-            if (e.getMessage().contains("Duplicate entry")) {
-                if (e.getMessage().contains("username")) {
-                    this.errorMessage = "Username already exists.";
-                } else if (e.getMessage().contains("email")) {
-                    this.errorMessage = "Email already exists.";
-                } else {
-                    this.errorMessage = "Duplicate entry error: " + e.getMessage();
-                }
-            } else {
-                this.errorMessage = "Database error: " + e.getMessage();
-            }
+            this.errorMessage = "Registration failed due to a database error.";
             return false;
         }
     }
 
     public String getErrorMessage() {
-        return errorMessage;
+        return errorMessage != null ? errorMessage : "An unspecified error occurred.";
     }
 
-    // ✅ NEW METHOD TO SAVE SCORE
-    public boolean saveScore(String username, int score) {
-        String query = "INSERT INTO scores (username, score) VALUES (?, ?)";
+    // --- Methods for Admin Panel ---
 
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, username);
-            stmt.setInt(2, score);
-            int rowsAffected = stmt.executeUpdate();
+    public int getTotalUserCount() {
+        String sql = "SELECT COUNT(*) FROM users";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public String getNewestUser() {
+        String sql = "SELECT username FROM users ORDER BY id DESC LIMIT 1";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getString("username");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "N/A";
+    }
+
+    public List<UserData> getAllUsers() {
+        List<UserData> userList = new ArrayList<>();
+        String sql = "SELECT * FROM users ORDER BY username";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                userList.add(new UserData(
+                    rs.getInt("id"),
+                    rs.getString("username"),
+                    rs.getString("email"),
+                    rs.getString("password"),
+                    rs.getString("role") 
+                ));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return userList;
+    }
+
+    public boolean deleteUserByUsername(String username) {
+        String sql = "DELETE FROM users WHERE username = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    public UserData getUserByUsername(String username) {
+        String sql = "SELECT * FROM users WHERE username = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return new UserData(
+                        rs.getInt("id"),
+                        rs.getString("username"),
+                        rs.getString("email"),
+                        rs.getString("password"),
+                        rs.getString("role") // Fetch the role for the selected user
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean updateUser(UserData user) {
+        String sql = "UPDATE users SET username = ?, email = ?, password = ?, role = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, user.getUsername());
+            pstmt.setString(2, user.getEmail());
+            pstmt.setString(3, user.getPassword());
+            pstmt.setString(4, user.getRole());
+            pstmt.setInt(5, user.getId());
+            int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
-            System.err.println("Failed to save score: " + e.getMessage());
             e.printStackTrace();
             return false;
         }

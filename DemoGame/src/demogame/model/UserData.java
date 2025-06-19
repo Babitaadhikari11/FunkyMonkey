@@ -14,18 +14,20 @@ public class UserData {
     private String username;
     private String email;
     private String password;
-//    constructor for creating new user (signup)
+    private String role;
+    //    constructor for creating new user (signup)
     public UserData(String username, String email, String password){
         this.username =  username;
         this.email =  email;
         this.password =  password;
     }
 //    constructor for loading a  user from the database
-    public UserData(int id, String username, String email,String password){
+    public UserData(int id, String username, String email,String password, String role){
         this.id = id;
         this.username=username;
         this.email=email;
         this.password=password;
+        this.role=role;
     }
 //    getter and setters
     public int getId() {
@@ -53,6 +55,9 @@ public class UserData {
         this.password = password;
     }
    
-   
+    public String getRole() {
+        return role;
+    }
+
 }
 
