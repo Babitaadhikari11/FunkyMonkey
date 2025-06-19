@@ -79,5 +79,24 @@ public class MonkeyController implements KeyListener {
             }
         }
     }
+
+    private void performNormalJump() {
+        monkey.jump();
+        jumpInProgress = true;
+        // Maintain current horizontal velocity during normal jump
+        if (rightPressed) {
+            monkey.setVelocityX(NORMAL_MOVE_SPEED * 1.5f); // Slight boost
+        } else if (leftPressed) {
+            monkey.setVelocityX(-NORMAL_MOVE_SPEED);
+        }
+    }
+     private void performForwardJump() {
+        // Significantly increased forward momentum for obstacle clearing
+        float jumpVelocity = JUMP_MOVE_SPEED * JUMP_BOOST;
+        monkey.setVelocityX(jumpVelocity);
+        monkey.jumpForward(); // Use special forward jump with higher arc
+        jumpInProgress = true;
+        monkey.setFacingRight(true);
+    }
     
 }
