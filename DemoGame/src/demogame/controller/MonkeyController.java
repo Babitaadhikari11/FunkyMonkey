@@ -25,5 +25,28 @@ public class MonkeyController implements KeyListener {
         this.jumpInProgress = false;
         this.lastJumpTime = 0;
     }
+     @Override
+    public void keyPressed(KeyEvent e) {
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_LEFT -> {
+                leftPressed = true;
+                updateMovement();
+            }
+            case KeyEvent.VK_RIGHT -> {
+                rightPressed = true;
+                if (spacePressed && monkey.isOnGround()) {
+                    performForwardJump();
+                } else {
+                    updateMovement();
+                }
+            }
+            case KeyEvent.VK_SPACE, KeyEvent.VK_UP -> {
+                if (!spacePressed) {
+                    spacePressed = true;
+                    handleJumpInput();
+                }
+            }
+        }
+    }
     
 }
