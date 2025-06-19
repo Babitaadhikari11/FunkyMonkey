@@ -73,5 +73,30 @@ public class BananaController {
             bananas.add(new Banana(bananaX, bananaY));
         }
     }
+       private boolean isValidSpawnLocation(int x, int y, ArrayList<Obstacle> obstacles) {
+        Rectangle bananaArea = new Rectangle(x, y, 30, 30);
+        
+        // Check collision with obstacles
+        for (Obstacle obstacle : obstacles) {
+            Rectangle obstacleArea = new Rectangle(
+                obstacle.getX(), obstacle.getY(),
+                obstacle.getWidth(), obstacle.getHeight()
+            );
+            if (bananaArea.intersects(obstacleArea)) {
+                return false;
+            }
+        }
+        return true;
+    }
+     public void checkCollisions(Monkey monkey) {
+        Iterator<Banana> it = bananas.iterator();
+        while (it.hasNext()) {
+            Banana banana = it.next();
+            if (!banana.isCollected() && checkCollision(banana, monkey)) {
+                handleBananaCollection();
+                it.remove();
+            }
+        }
+    }
     
 }
