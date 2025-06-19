@@ -8,6 +8,19 @@ public class Banana {
     private boolean isCollected;
     private Rectangle bounds;
     private final int SPEED = 3;
+     public Banana(int x, int y) {
+        this.x = x;
+        this.y = y;
+        this.isCollected = false;
+        this.bounds = new Rectangle(x, y, WIDTH, HEIGHT);
+    }
+
+    public void update() {
+        x -= SPEED;
+        bounds.setLocation(x, y);
+    }
+
+
 
     // Getters and Setters
     public int getX() { return x; }
