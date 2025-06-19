@@ -65,5 +65,19 @@ public class MonkeyController implements KeyListener {
             }
         }
     }
+
+    private void handleJumpInput() {
+        if (monkey.isOnGround()) {
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastJumpTime > JUMP_WINDOW) {
+                if (rightPressed) {
+                    performForwardJump();
+                } else {
+                    performNormalJump();
+                }
+                lastJumpTime = currentTime;
+            }
+        }
+    }
     
 }
