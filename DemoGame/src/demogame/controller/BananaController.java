@@ -26,5 +26,30 @@ public class BananaController {
     private final int GROUND_LEVEL;
     private int score;
     private int bananasCollected;
+     public BananaController(int panelWidth, int groundLevel) {
+        this.PANEL_WIDTH = panelWidth;
+        this.GROUND_LEVEL = groundLevel;
+        this.bananas = new ArrayList<>();
+        this.random = new Random();
+        this.score = 0;
+        this.bananasCollected = 0;
+    }
+     public void update(ArrayList<Obstacle> obstacles) {
+        if (bananas.size() < MAX_BANANAS) {
+            spawnBanana(obstacles);
+        }
+
+        updateBananas();
+    }
+     private void updateBananas() {
+        Iterator<Banana> it = bananas.iterator();
+        while (it.hasNext()) {
+            Banana banana = it.next();
+            banana.update();
+            if (isOffscreen(banana)) {
+                it.remove();
+            }
+        }
+    }
     
 }
