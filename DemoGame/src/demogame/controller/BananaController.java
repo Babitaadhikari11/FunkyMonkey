@@ -121,5 +121,15 @@ public class BananaController {
         bananasCollected++;
         // Could add sound effects or particle effects here
     }
+    public void restart() {
+        bananas.clear();
+        score = 0;
+        bananasCollected = 0;
+    }
+    
+    // Getters
+    public int getScore() { return score; }
+    public int getBananasCollected() { return bananasCollected; }
+    public ArrayList<Banana> getBananas() { return bananas; }
     
 }
