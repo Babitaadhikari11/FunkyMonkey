@@ -46,6 +46,29 @@ public class ObstacleController {
             }
         }
     }
+    private boolean canSpawnObstacle() {
+        // Don't spawn if too many obstacles
+        if (obstacles.size() >= MAX_OBSTACLES) {
+            return false;
+        }
+
+        // Check spacing from last obstacle
+        if (!obstacles.isEmpty()) {
+            Obstacle lastObstacle = obstacles.get(obstacles.size() - 1);
+            return lastObstacle.getX() < PANEL_WIDTH - MIN_OBSTACLE_SPACING;
+        }
+
+        return true;
+    }
+     private void spawnObstacle() {
+    int obstacleX = PANEL_WIDTH + SPAWN_OFFSET;
+    // Adjust Y position to match monkey's level
+    int obstacleY = GROUND_LEVEL - 110; // Move obstacles up slightly
+    
+    // Create new obstacle with slightly smaller size
+    Obstacle obstacle = new Obstacle(obstacleX, obstacleY, 70, 90);
+    obstacles.add(obstacle);
+}
 
     
 }
