@@ -19,6 +19,18 @@ public class BananaView {
             System.err.println("Error loading banana image: " + e.getMessage());
         }
     }
+       public void drawBananas(Graphics2D g2d, java.util.List<Banana> bananas) {
+        if (bananaImage != null) {
+            for (Banana banana : bananas) {
+                if (!banana.isCollected()) {
+                    g2d.drawImage(bananaImage,
+                        banana.getX(), banana.getY(),
+                        banana.getWidth(), banana.getHeight(),
+                        null);
+                }
+            }
+        }
+    }
 
     
 }
