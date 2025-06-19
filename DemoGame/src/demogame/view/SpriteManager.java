@@ -35,5 +35,19 @@ public class SpriteManager {
             e.printStackTrace();
         }
     }
+      public BufferedImage getSprite(int frameNumber) {
+        // Ensure frame number stays within bounds
+        int adjustedFrame = ((frameNumber - 1) % TOTAL_FRAMES) + 1;
+        BufferedImage sprite = sprites.get(adjustedFrame);
+        if (sprite == null) {
+            System.err.println("Sprite not found for frame: " + frameNumber);
+        }
+        return sprite;
+    }
+
+    // Debug method
+    public void printLoadedSprites() {
+        System.out.println("Loaded sprites: " + sprites.keySet());
+    }
     
 }
