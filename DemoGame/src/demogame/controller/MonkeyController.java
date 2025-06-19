@@ -98,5 +98,39 @@ public class MonkeyController implements KeyListener {
         jumpInProgress = true;
         monkey.setFacingRight(true);
     }
+    private void updateMovement() {
+        if (jumpInProgress && monkey.isJumping()) {
+            // Maintain strong forward momentum during jump
+            if (rightPressed) {
+                float currentVelocity = monkey.getVelocityX();
+                if (currentVelocity < JUMP_MOVE_SPEED) {
+                    monkey.setVelocityX(currentVelocity + 0.5f); // Gradual acceleration
+                }
+            }
+            return;
+        }
+
+        if (leftPressed && !rightPressed) {
+            float speed = monkey.isOnGround() ? NORMAL_MOVE_SPEED : (NORMAL_MOVE_SPEED * AIR_CONTROL);
+            monkey.setVelocityX(-speed);
+            monkey.setFacingRight(false);
+        } else if (rightPressed && !leftPressed) {
+            float speed = monkey.isOnGround() ? NORMAL_MOVE_SPEED : (NORMAL_MOVE_SPEED * AIR_CONTROL);
+            monkey.setVelocityX(speed);
+            monkey.setFacingRight(true);
+        } else {
+            if (monkey.isOnGround()) {
+                monkey.setVelocityX(0);
+            } else {
+                // Gradual air deceleration
+                float currentVelocity = monkey.getVelocityX();
+                monkey.setVelocityX(currentVelocity * 0.98f);
+            }
+        }
+
+        if (monkey.isOnGround()) {
+            jumpInProgress = false;
+        }
+    }
     
 }
