@@ -51,5 +51,27 @@ public class BananaController {
             }
         }
     }
+     private boolean isOffscreen(Banana banana) {
+        return banana.getX() + BANANA_WIDTH < 0;
+    }
+        private void spawnBanana(ArrayList<Obstacle> obstacles) {
+        int bananaX = PANEL_WIDTH + random.nextInt(200);
+        int bananaY;
+
+        // Randomly decide if banana should be at monkey's level
+        if (random.nextInt(100) < MONKEY_LEVEL_CHANCE) {
+            // Place banana at monkey's running level
+            bananaY = GROUND_LEVEL - MONKEY_HEIGHT - 20; // Match monkey's height
+        } else {
+            // Random height for other bananas
+            int minHeight = GROUND_LEVEL - 300;  // Highest point
+            int maxHeight = GROUND_LEVEL - 100;  // Lowest point
+            bananaY = minHeight + random.nextInt(maxHeight - minHeight);
+        }
+
+        if (isValidSpawnLocation(bananaX, bananaY, obstacles)) {
+            bananas.add(new Banana(bananaX, bananaY));
+        }
+    }
     
 }
