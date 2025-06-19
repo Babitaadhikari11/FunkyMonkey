@@ -98,5 +98,28 @@ public class BananaController {
             }
         }
     }
+       private boolean checkCollision(Banana banana, Monkey monkey) {
+        // Create collision bounds with insets for more precise collision
+        Rectangle monkeyBounds = createMonkeyCollisionBounds(monkey);
+        Rectangle bananaBounds = banana.getBounds();
+        
+        return bananaBounds.intersects(monkeyBounds);
+    }
+
+    private Rectangle createMonkeyCollisionBounds(Monkey monkey) {
+        // Use a smaller collision box for more precise collision detection
+        return new Rectangle(
+            monkey.getX() + COLLISION_INSET,
+            monkey.getY() + COLLISION_INSET,
+            MONKEY_DEFAULT_SIZE - (COLLISION_INSET * 2),
+            MONKEY_DEFAULT_SIZE - (COLLISION_INSET * 2)
+        );
+    }
+
+    private void handleBananaCollection() {
+        score++;
+        bananasCollected++;
+        // Could add sound effects or particle effects here
+    }
     
 }
