@@ -14,5 +14,16 @@ public class MonkeyState {
         FALLING,
         VICTORY
     }
+    //  helper methods -- actual dont need
+    public static int[] getFramesForState(State state) {
+        switch (state) {
+            case IDLE: return IDLE_FRAMES;
+            case WALKING: return WALKING_FRAMES;
+            case JUMPING: return JUMPING_FRAMES;
+            case FALLING: return FALLING_FRAMES;
+            case VICTORY: return VICTORY_FRAMES;
+            default: return IDLE_FRAMES;
+        }
+    }
     
 }
