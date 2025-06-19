@@ -27,5 +27,14 @@ public class GameState {
     public int getLevel() { return level; }
     public float getGameSpeed() { return gameSpeed; }
     public int getDistanceTraveled() { return distanceTraveled; }
-    
+    public void addScore(int points) {
+        score += points;
+    }
+
+    public void reset() {
+        score = 0;
+        level = 1;
+        distanceTraveled = 0;
+        gameSpeed = 1.0f;
+    }
 }
