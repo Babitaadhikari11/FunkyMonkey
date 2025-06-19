@@ -132,5 +132,17 @@ public class MonkeyController implements KeyListener {
             jumpInProgress = false;
         }
     }
+      @Override
+    public void keyTyped(KeyEvent e) {
+        // Not used
+    }
+
+    public void reset() {
+        leftPressed = false;
+        rightPressed = false;
+        spacePressed = false;
+        jumpInProgress = false;
+        lastJumpTime = 0;
+    }
     
 }
