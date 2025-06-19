@@ -1,5 +1,5 @@
 package demogame.view;
-//import demogame.model.Banana;
+import demogame.model.Banana;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import javax.swing.ImageIcon;
