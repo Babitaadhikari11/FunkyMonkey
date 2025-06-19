@@ -1,5 +1,7 @@
 package demogame.model;
+
 import java.awt.Rectangle;
+
 public class Monkey {
     // Physics constants
     private static final float JUMP_FORCE = -18.0f;
@@ -11,11 +13,12 @@ public class Monkey {
     private static final float MAX_FALL_SPEED = 8.0f;
     private static final float FORWARD_JUMP_FORCE = -22.0f; // Extra boost when jumping forward
     private static final float HORIZONTAL_DAMPING = 0.99f; // Reduced horizontal slowdown
-     // Position and velocity
+    // Position and velocity
     private float x;
     private float y;
     private float velocityX;
     private float velocityY;
+
     // State
     private boolean isJumping;
     private boolean isOnGround;
@@ -28,7 +31,8 @@ public class Monkey {
 
     // Collision
     private Rectangle bounds;
-      public Monkey(int startX, int startY) {
+
+    public Monkey(int startX, int startY) {
         this.x = startX;
         this.y = startY;
         this.velocityX = 0;
@@ -61,10 +65,10 @@ public class Monkey {
         // bounds.setLocation(Math.round(x), Math.round(y));
 
         // Update animation
-       
         updateAnimation();
     }
-     private void updateAnimation() {
+
+    private void updateAnimation() {
         frameDelay++;
         if (frameDelay >= FRAME_DELAY_LIMIT) {
             frameDelay = 0;
@@ -79,7 +83,8 @@ public class Monkey {
             }
         }
     }
-     public void jump() {
+
+    public void jump() {
         if (isOnGround) {
             velocityY = JUMP_FORCE;
             isJumping = true;
@@ -90,17 +95,20 @@ public class Monkey {
             }
         }
     }
+
     public void moveLeft() {
         float targetSpeed = isOnGround ? -MOVE_SPEED : -MOVE_SPEED * AIR_CONTROL;
         velocityX = targetSpeed;
         facingRight = false;
     }
+
     public void moveRight() {
         float targetSpeed = isOnGround ? MOVE_SPEED : MOVE_SPEED * AIR_CONTROL;
         velocityX = targetSpeed;
         facingRight = true;
     }
-     public void jumpForward() {
+
+    public void jumpForward() {
         if (isOnGround) {
             velocityY = FORWARD_JUMP_FORCE;
             // velocityX = FORWARD_JUMP_FORCE;
@@ -109,6 +117,7 @@ public class Monkey {
             facingRight = true;
         }
     }
+
     // Getters
     public int getX() { return Math.round(x); }
     public int getY() { return Math.round(y); }
@@ -151,6 +160,3 @@ public class Monkey {
         this.facingRight = facingRight;
     }
 }
-
-    
-
