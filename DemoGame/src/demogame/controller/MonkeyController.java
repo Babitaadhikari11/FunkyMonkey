@@ -48,5 +48,22 @@ public class MonkeyController implements KeyListener {
             }
         }
     }
+       @Override
+    public void keyReleased(KeyEvent e) {
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_LEFT -> {
+                leftPressed = false;
+                updateMovement();
+            }
+            case KeyEvent.VK_RIGHT -> {
+                rightPressed = false;
+                updateMovement();
+            }
+            case KeyEvent.VK_SPACE, KeyEvent.VK_UP -> {
+                spacePressed = false;
+                // Don't reset jumpInProgress here to maintain momentum
+            }
+        }
+    }
     
 }
