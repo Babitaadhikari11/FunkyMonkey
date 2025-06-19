@@ -1,5 +1,29 @@
 package demogame.controller;
+import demogame.model.Monkey;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+public class MonkeyController implements KeyListener {
+    // Increased speeds for better obstacle clearing
+    private static final float NORMAL_MOVE_SPEED = 2.0f;
+    private static final float JUMP_MOVE_SPEED = 8.0f;     // Increased from 6.0f
+    private static final float JUMP_BOOST = 1.2f;          // Increased from 1.5f
+    private static final float AIR_CONTROL = 0.8f;
+    private static final int JUMP_WINDOW = 200;
 
-public class MonkeyController {
+    private final Monkey monkey;
+    private boolean leftPressed;
+    private boolean rightPressed;
+    private boolean spacePressed;
+    private boolean jumpInProgress;
+    private long lastJumpTime;
+
+    public MonkeyController(Monkey monkey) {
+        this.monkey = monkey;
+        this.leftPressed = false;
+        this.rightPressed = false;
+        this.spacePressed = false;
+        this.jumpInProgress = false;
+        this.lastJumpTime = 0;
+    }
     
 }
