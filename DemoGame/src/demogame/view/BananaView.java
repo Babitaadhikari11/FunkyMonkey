@@ -31,6 +31,20 @@ public class BananaView {
             }
         }
     }
+      public void drawScore(Graphics2D g2d, int score, int bananasCollected) {
+        g2d.setColor(SCORE_COLOR);
+        g2d.setFont(SCORE_FONT);
+        
+        // Draw score
+        String scoreText = "Score: " + score;
+        g2d.drawString(scoreText, 20, 30);
+        
+        // Draw banana icon and count
+        if (bananaImage != null) {
+            g2d.drawImage(bananaImage, 120, 10, 20, 20, null);
+            g2d.drawString("x " + bananasCollected, 145, 30);
+        }
+    }
 
     
 }
