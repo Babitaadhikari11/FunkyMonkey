@@ -69,6 +69,23 @@ public class ObstacleController {
     Obstacle obstacle = new Obstacle(obstacleX, obstacleY, 70, 90);
     obstacles.add(obstacle);
 }
+public boolean checkCollisions(Monkey monkey) {
+        for (Obstacle obstacle : obstacles) {
+            if (obstacle.checkCollision(monkey)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void restart() {
+        obstacles.clear();
+        spawnTimer = 0;
+    }
+
+    public ArrayList<Obstacle> getObstacles() {
+        return obstacles;
+    }
 
     
 }
