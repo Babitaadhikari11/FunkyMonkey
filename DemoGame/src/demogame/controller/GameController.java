@@ -14,109 +14,158 @@ public class GameController {
     private GameView gameView;
     private int userId;
     private ScoreDao scoreDao;
+    private GameOverListener gameOverListener;
+    private boolean isGameRunning;
 
-    // Default constructor (used for testing/demo)
+    // Default constructor
     public GameController() {
         initDatabase();
         showMenu();
     }
 
-    // Overloaded constructor with GameView (not used, placeholder)
-    public GameController(GameView gameView2) {
-        this.gameView = gameView2;
-        initDatabase();
-    }
-
-    // Overloaded constructor to receive logged-in user ID
+    // Constructor with userId
     public GameController(int userId) {
         this.userId = userId;
         initDatabase();
-        showMenu();
+        isGameRunning = false;
     }
 
-   private void initDatabase() {
-    try {
-        Connection conn = DatabaseConnection.getConnection();
-        this.scoreDao = new ScoreDao(conn);
-    } catch (SQLException e) {
-        e.printStackTrace();
-        JOptionPane.showMessageDialog(null, "Database connection failed!", "Error", JOptionPane.ERROR_MESSAGE);
+    private void initDatabase() {
+        try {
+            Connection conn = DatabaseConnection.getConnection();
+            this.scoreDao = new ScoreDao(conn);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, 
+                "Database connection failed!", 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
-}
 
+    public void showMenu() {
+        SwingUtilities.invokeLater(() -> {
+            MenuView menuView = new MenuView("Player");
 
-    private void showMenu() {
-        MenuView menuView = new MenuView("Player");
+            menuView.getStartButton().addActionListener(e -> {
+                menuView.dispose();
+                showLoadingScreen();
+            });
 
-        menuView.getStartButton().addActionListener(e -> {
-            menuView.dispose();
-            showLoadingScreen();
+            menuView.getQuitButton().addActionListener(e -> {
+                cleanup();
+                System.exit(0);
+            });
+
+            menuView.setVisible(true);
         });
-
-        menuView.getQuitButton().addActionListener(e -> System.exit(0));
-
-        menuView.setVisible(true);
     }
 
     private void showLoadingScreen() {
         LoadingView loadingView = new LoadingView();
+        new LoadingController(loadingView, userId);
         loadingView.setVisible(true);
-
-        Timer loadingTimer = new Timer(100, null);
-        loadingTimer.addActionListener(new AbstractAction() {
-            int progress = 0;
-
-            @Override
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                progress += 10;
-                loadingView.updateProgress(progress);
-                loadingView.updateTip("Tip: Use arrow keys to move 🕹️");
-
-                if (progress >= 100) {
-                    loadingTimer.stop();
-                    loadingView.dispose();
-                    launchGame();
-                }
-            }
-        });
-        loadingTimer.start();
     }
 
- private void launchGame() {
-    gameView = new GameView();
-    gameView.setVisible(true);
-    
-    // At the end of the game, call this:
-    int finalScore = gameView.getFinalScore();
-    saveScore(finalScore);
-}
-
-
-private GameOverListener gameOverListener;
-
-    public void setGameOverListener(Object object) {
-        if (object instanceof GameOverListener) {
-            this.gameOverListener = (GameOverListener) object;
-        } else {
-            throw new IllegalArgumentException("Parameter must implement GameOverListener");
+    public void startGame() {
+        if (!isGameRunning) {
+            isGameRunning = true;
+            gameView = new GameView(this);
+            gameView.setVisible(true);
         }
     }
 
-    // Method to trigger game over
+    public void pauseGame() {
+        if (isGameRunning && gameView != null) {
+            gameView.showPauseMenu();
+        }
+    }
+
+    public void resumeGame() {
+        if (isGameRunning && gameView != null) {
+            gameView.getGamePanel().togglePause();
+        }
+    }
+
+    public void restartGame() {
+        if (gameView != null) {
+            gameView.restartGame();
+        }
+    }
+
     public void endGame() {
+        isGameRunning = false;
         if (gameOverListener != null) {
             gameOverListener.onGameOver();
         }
     }
 
-    // Save score to DB
+    public void quitGame() {
+        if (gameView != null) {
+            int finalScore = gameView.getFinalScore();
+            saveScore(finalScore);
+            gameView.dispose();
+        }
+        isGameRunning = false;
+        showMenu();
+    }
+
     public void saveScore(int score) {
-    if (scoreDao != null) {
-            boolean success = scoreDao.insertScore(userId, score);
-            if (success) {
-                System.out.println("✅ Score saved successfully!");
-            } else {
-                System.err.println("❌ Failed to save score.");
+        if (scoreDao != null && userId > 0) {
+            try {
+                boolean success = scoreDao.insertScore(userId, score);
+                if (success) {
+                    System.out.println("✅ Score saved successfully!");
+                } else {
+                    System.err.println("❌ Failed to save score.");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.err.println("❌ Error saving score: " + e.getMessage());
+            }
+        }
+    }
+
+    public void setGameOverListener(GameOverListener listener) {
+        this.gameOverListener = listener;
+    }
+
+    public int getCurrentScore() {
+        return gameView != null ? gameView.getCurrentScore() : 0;
+    }
+
+    public boolean isGameRunning() {
+        return isGameRunning;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    private void cleanup() {
+        if (gameView != null) {
+            gameView.dispose();
+        }
+        try {
+            if (DatabaseConnection.getConnection() != null) {
+                DatabaseConnection.closeConnection();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to handle window closing
+    public void handleWindowClosing() {
+        if (isGameRunning) {
+            int choice = JOptionPane.showConfirmDialog(
+                gameView,
+                "Are you sure you want to quit?",
+                "Quit Game",
+                JOptionPane.YES_NO_OPTION
+            );
+            if (choice == JOptionPane.YES_OPTION) {
+                quitGame();
             }
         }
     }

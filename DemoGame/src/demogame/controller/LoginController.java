@@ -2,32 +2,31 @@ package demogame.controller;
 
 import demogame.dao.UserDao;
 import demogame.model.UserData;
-import demogame.view.GameView;
 import demogame.view.LoginView;
 import demogame.view.MenuView;
 import demogame.view.SignUpView;
+import demogame.view.LoadingView;
 import javax.swing.SwingUtilities;
 
 public class LoginController {
     private UserDao userDAO;
     private LoginView view;
-
-    // ✅ New: Field to store logged-in user's ID
     private int loggedInUserId = -1;
+    private String loggedInUsername;
 
     public LoginController(LoginView view) {
         this.view = view;
         this.userDAO = new UserDao();
+        initializeListeners();
+    }
 
+    private void initializeListeners() {
         view.getLoginButton().addActionListener(e -> handleLogin());
 
         view.getCreateAccountLink().addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                view.setVisible(false);
-                SignUpView signUpPanel = new SignUpView();
-                new SignupController(signUpPanel);
-                signUpPanel.setVisible(true);
+                showSignUpView();
             }
         });
     }
@@ -36,38 +35,102 @@ public class LoginController {
         String username = view.getUsername();
         String password = view.getPassword();
 
-        if (username.isEmpty() || password.isEmpty()) {
-            view.showError("Username and password cannot be empty.");
-            return;
-        }
-
-        UserData user = userDAO.authenticate(username, password);
-        if (user != null) {
-            view.showSuccess("Login successful! Welcome, " + username + "!");
-
-            // ✅ New: store logged-in user's ID
-            this.loggedInUserId = user.getId();  // Assumes UserData has getId()
-
-            view.setVisible(false);
-            MenuView menuView = new MenuView(username);
-            new MenuController(menuView, user); // Passing user object
-            menuView.setVisible(true);
-        } else {
-            view.showError(userDAO.getErrorMessage());
+        if (validateInput(username, password)) {
+            authenticateUser(username, password);
         }
     }
 
-    private void launchGame() {
+    private boolean validateInput(String username, String password) {
+        if (username.isEmpty() || password.isEmpty()) {
+            view.showError("Username and password cannot be empty.");
+            return false;
+        }
+        return true;
+    }
+
+    private void authenticateUser(String username, String password) {
+        try {
+            UserData user = userDAO.authenticate(username, password);
+            if (user != null) {
+                handleSuccessfulLogin(user);
+            } else {
+                view.showError(userDAO.getErrorMessage());
+            }
+        } catch (Exception e) {
+            view.showError("Authentication error: " + e.getMessage());
+        }
+    }
+
+    private void handleSuccessfulLogin(UserData user) {
+        this.loggedInUserId = user.getId();
+        this.loggedInUsername = user.getUsername();
+        view.showSuccess("Login successful! Welcome, " + loggedInUsername + "!");
+        
+        // Start transition to menu
         SwingUtilities.invokeLater(() -> {
-            view.dispose();
-            GameView gameView = new GameView();
-            new GameController(gameView);
-            gameView.setVisible(true);
+            view.setVisible(false);
+            showMenuView(user);
         });
     }
 
-    // ✅ New: Getter for logged-in user ID
+    private void showSignUpView() {
+        SwingUtilities.invokeLater(() -> {
+            view.setVisible(false);
+            SignUpView signUpPanel = new SignUpView();
+            new SignupController(signUpPanel);
+            signUpPanel.setVisible(true);
+        });
+    }
+
+    private void showMenuView(UserData user) {
+        SwingUtilities.invokeLater(() -> {
+            MenuView menuView = new MenuView(user.getUsername());
+            new MenuController(menuView, user);
+            menuView.setVisible(true);
+            view.dispose(); // Clean up login view
+        });
+    }
+
+    public void startGame() {
+        SwingUtilities.invokeLater(() -> {
+            // Show loading screen first
+            LoadingView loadingView = new LoadingView();
+            new LoadingController(loadingView, loggedInUserId);
+            loadingView.setVisible(true);
+            
+            // Clean up login view if it's still showing
+            if (view != null) {
+                view.dispose();
+            }
+        });
+    }
+
+    // Getters and utility methods
     public int getLoggedInUserId() {
         return loggedInUserId;
+    }
+
+    public String getLoggedInUsername() {
+        return loggedInUsername;
+    }
+
+    public boolean isUserLoggedIn() {
+        return loggedInUserId != -1;
+    }
+
+    // Clean up method
+    public void cleanup() {
+        if (view != null) {
+            view.dispose();
+        }
+        // Add any additional cleanup needed
+    }
+
+    // Error handling method
+    private void handleError(String message, Exception e) {
+        e.printStackTrace();
+        SwingUtilities.invokeLater(() -> {
+            view.showError(message + "\nError: " + e.getMessage());
+        });
     }
 }
