@@ -38,6 +38,33 @@ public class QuitButtonView {
             BorderFactory.createEmptyBorder(5, 10, 5, 10)
         ));
     }
+        private void addHoverEffect() {
+        addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                setBackground(HOVER_COLOR);
+                setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(TEXT_COLOR, 2),
+                    BorderFactory.createEmptyBorder(4, 9, 4, 9)
+                ));
+            }
+                    @Override
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                setBackground(new Color(255, 150, 150, 200));
+            }
+            
+            @Override
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                if (contains(evt.getPoint())) {
+                    setBackground(HOVER_COLOR);
+                } else {
+                    setBackground(BACKGROUND_COLOR);
+                }
+            }
+        });
+    }
+
+
 
 
     
