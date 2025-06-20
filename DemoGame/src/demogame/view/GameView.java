@@ -1,19 +1,23 @@
 package demogame.view;
 
-
 import demogame.controller.GameController;
 import demogame.model.GameOverListener;
-import java.awt.*;
 import javax.swing.*;
+import java.awt.*;
 
-public class GameView extends JFrame {
+public class GameView extends JFrame implements GameOverListener {
     private JLabel scoreLabel;
     private GamePanel gamePanel;
-
-    // ✅ ADD: Track score internally
+    private GameController gameController;
     private int currentScore = 0;
 
-    public GameView() {
+    // Constructor
+    public GameView(GameController controller) {
+        this.gameController = controller;
+        initializeUI();
+    }
+
+    private void initializeUI() {
         setTitle("DemoGame - Play");
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -24,7 +28,7 @@ public class GameView extends JFrame {
         layeredPane.setPreferredSize(new Dimension(1200, 800));
         setContentPane(layeredPane);
 
-        gamePanel = new GamePanel();
+        gamePanel = new GamePanel(this);
         gamePanel.setBounds(0, 0, 1200, 800);
         layeredPane.add(gamePanel, JLayeredPane.DEFAULT_LAYER);
 
@@ -33,39 +37,110 @@ public class GameView extends JFrame {
         scoreLabel.setForeground(Color.WHITE);
         scoreLabel.setBounds(20, 10, 200, 30);
         layeredPane.add(scoreLabel, JLayeredPane.PALETTE_LAYER);
+
+        setupWindowListener();
     }
 
-    /**
-     * ✅ MODIFIED: Updates both the label and internal score.
-     */
+    private void setupWindowListener() {
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                handleGameExit();
+            }
+        });
+    }
+
+    @Override
+    public void onGameOver() {
+        int finalScore = getCurrentScore();
+        gameController.saveScore(finalScore);
+        
+        SwingUtilities.invokeLater(() -> {
+            int choice = JOptionPane.showConfirmDialog(
+                this,
+                "Game Over!\nFinal Score: " + finalScore + "\nWould you like to play again?",
+                "Game Over",
+                JOptionPane.YES_NO_OPTION
+            );
+
+            if (choice == JOptionPane.YES_OPTION) {
+                restartGame();
+            } else {
+                handleGameExit();
+            }
+        });
+    }
+
+    public void showPauseMenu() {
+        if (gamePanel != null) {
+            Object[] options = {"Resume", "Restart", "Quit"};
+            int choice = JOptionPane.showOptionDialog(
+                this,
+                "Game Paused",
+                "Pause Menu",
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[0]
+            );
+
+            switch (choice) {
+                case 0: // Resume
+                    gamePanel.togglePause();
+                    break;
+                case 1: // Restart
+                    restartGame();
+                    break;
+                case 2: // Quit
+                    handleGameExit();
+                    break;
+            }
+        }
+    }
+
     public void updateScore(int score) {
         this.currentScore = score;
-        scoreLabel.setText("Score: " + score);
+        SwingUtilities.invokeLater(() -> {
+            scoreLabel.setText("Score: " + score);
+        });
+    }
+
+    public void restartGame() {
+        currentScore = 0;
+        updateScore(0);
+        if (gamePanel != null) {
+            gamePanel.restartGame();
+        }
+    }
+
+    private void handleGameExit() {
+        gameController.saveScore(currentScore);
+        dispose();
+        gameController.showMenu();
     }
 
     public GamePanel getGamePanel() {
         return gamePanel;
     }
 
-    /**
-     * ✅ NEW: Get the final score at the end of the game
-     */
+    public int getCurrentScore() {
+        return currentScore;
+    }
+
     public int getFinalScore() {
         return currentScore;
     }
 
-    private GameController gameController;
+    public GameController getGameController() {
+        return gameController;
+    }
 
-    public GameView(GameController controller) {
-        this.gameController = controller;
-        // Set the listener
-        gameController.setGameOverListener(new GameOverListener() {
-            @Override
-            public void onGameOver() {
-                // Handle game over logic (e.g., show game over screen)
-                System.out.println("Game Over!");
-                // Add UI updates or other actions here
-            }
-        });
-}
+    @Override
+    public void dispose() {
+        if (gamePanel != null) {
+            gamePanel.cleanup();
+        }
+        super.dispose();
+    }
 }

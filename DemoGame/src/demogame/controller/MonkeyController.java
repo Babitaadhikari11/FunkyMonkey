@@ -1,6 +1,8 @@
 package demogame.controller;
 
 import demogame.model.Monkey;
+import demogame.view.GamePanel;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -18,6 +20,7 @@ public class MonkeyController implements KeyListener {
     private boolean spacePressed;
     private boolean jumpInProgress;
     private long lastJumpTime;
+    private GamePanel gamePanel;
 
     public MonkeyController(Monkey monkey) {
         this.monkey = monkey;
@@ -28,8 +31,16 @@ public class MonkeyController implements KeyListener {
         this.lastJumpTime = 0;
     }
 
+    // Add this setter
+    public void setGamePanel(GamePanel gamePanel) {
+        this.gamePanel = gamePanel;
+    }
+
     @Override
     public void keyPressed(KeyEvent e) {
+        if(gamePanel != null && gamePanel.isTutorialActive()){
+            return;
+        }
         switch (e.getKeyCode()) {
             case KeyEvent.VK_LEFT -> {
                 leftPressed = true;
@@ -54,6 +65,9 @@ public class MonkeyController implements KeyListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
+        if(gamePanel != null && gamePanel.isTutorialActive()){
+            return;
+        }
         switch (e.getKeyCode()) {
             case KeyEvent.VK_LEFT -> {
                 leftPressed = false;
