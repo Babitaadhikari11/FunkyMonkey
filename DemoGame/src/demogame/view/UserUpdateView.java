@@ -1,10 +1,11 @@
 package demogame.view;
+
 import demogame.util.RoundedPanel;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class UserUpdateView {
+public class UserUpdateView extends JFrame {
     private JLabel profilePicLabel;
     private JLabel usernameLabel;
     private JLabel emailLabel;
@@ -23,7 +24,8 @@ public class UserUpdateView {
         initializeFrame();
         createMainPanel(currentUsername, currentEmail);
     }
-     private void initializeFrame() {
+
+    private void initializeFrame() {
         setTitle("Funky Profile Update!");
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Changed to DISPOSE_ON_CLOSE
@@ -41,6 +43,7 @@ public class UserUpdateView {
         addProfileSection(mainPanel, currentUsername, currentEmail);
         addButtons(mainPanel);
     }
+
     private RoundedPanel createRoundedPanel() {
         RoundedPanel mainPanel = new RoundedPanel(30);
         mainPanel.setBackground(new Color(255, 250, 205));
@@ -54,8 +57,8 @@ public class UserUpdateView {
         
         return mainPanel;
     }
-    //optional
-       private void addSwingingMonkey(RoundedPanel mainPanel) {
+
+    private void addSwingingMonkey(RoundedPanel mainPanel) {
         try {
             ImageIcon monkeyIcon = new ImageIcon(getClass().getResource("/resources/mon.png"));
             Image scaledMonkey = monkeyIcon.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
@@ -68,6 +71,7 @@ public class UserUpdateView {
             System.err.println("Monkey image not found: " + e.getMessage());
         }
     }
+
     private void setupMonkeyAnimation() {
         monkeyTimer = new Timer(50, e -> {
             if (movingRight) {
@@ -81,6 +85,7 @@ public class UserUpdateView {
         });
         monkeyTimer.start();
     }
+
     private void addTitle(RoundedPanel mainPanel) {
         JLabel titleLabel = new JLabel("Your Funky Profile!", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Comic Sans MS", Font.BOLD, 28));
@@ -111,7 +116,8 @@ public class UserUpdateView {
         emailLabel.setBounds(0, 390, 600, 30);
         mainPanel.add(emailLabel);
     }
-     private void addButtons(RoundedPanel mainPanel) {
+
+    private void addButtons(RoundedPanel mainPanel) {
         int buttonWidth = 300;
         int buttonX = 150;
         
@@ -127,7 +133,8 @@ public class UserUpdateView {
         mainPanel.add(deleteAccountButton);
         mainPanel.add(backButton);
     }
-     private JButton createFunkyButton(String text, int yPos, int xPos, int width) {
+
+    private JButton createFunkyButton(String text, int yPos, int xPos, int width) {
         JButton button = new JButton(text);
         button.setBounds(xPos, yPos, width, 40);
         button.setFont(new Font("Comic Sans MS", Font.BOLD, 16));
@@ -140,7 +147,8 @@ public class UserUpdateView {
         addButtonHoverEffect(button);
         return button;
     }
-      private void addButtonHoverEffect(JButton button) {
+
+    private void addButtonHoverEffect(JButton button) {
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(new Color(255, 200, 0));
@@ -153,7 +161,8 @@ public class UserUpdateView {
             }
         });
     }
-      private void setDefaultProfilePic() {
+
+    private void setDefaultProfilePic() {
         BufferedImage defaultPic = new BufferedImage(PROFILE_PIC_SIZE, PROFILE_PIC_SIZE, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = defaultPic.createGraphics();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -170,7 +179,8 @@ public class UserUpdateView {
         g2d.dispose();
         profilePicLabel.setIcon(new ImageIcon(defaultPic));
     }
-     // Public methods
+
+    // Public methods
     public void setProfilePicture(Image image) {
         Image scaled = image.getScaledInstance(PROFILE_PIC_SIZE, PROFILE_PIC_SIZE, Image.SCALE_SMOOTH);
         profilePicLabel.setIcon(new ImageIcon(scaled));
@@ -179,7 +189,8 @@ public class UserUpdateView {
     public void updateUsername(String newUsername) {
         usernameLabel.setText("Username: " + newUsername);
     }
-     // Getters
+
+    // Getters
     public JButton getUploadPhotoButton() { return uploadPhotoButton; }
     public JButton getEditNameButton() { return editNameButton; }
     public JButton getDeleteAccountButton() { return deleteAccountButton; }
@@ -205,13 +216,12 @@ public class UserUpdateView {
         return JOptionPane.showConfirmDialog(this, message, "Confirm", 
                 JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
     }
-      @Override
+
+    @Override
     public void dispose() {
         if (monkeyTimer != null && monkeyTimer.isRunning()) {
             monkeyTimer.stop();
         }
         super.dispose();
     }
-
-    
 }
