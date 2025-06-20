@@ -190,5 +190,28 @@ public class UserUpdateView {
         return usernameLabel.getText().replace("Username: ", ""); 
     }
 
+    // Dialog methods
+    public void showError(String message) {
+        SwingUtilities.invokeLater(() -> 
+            JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE));
+    }
+
+    public void showSuccess(String message) {
+        SwingUtilities.invokeLater(() -> 
+            JOptionPane.showMessageDialog(this, message, "Success", JOptionPane.INFORMATION_MESSAGE));
+    }
+
+    public int showConfirmDialog(String message) {
+        return JOptionPane.showConfirmDialog(this, message, "Confirm", 
+                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+    }
+      @Override
+    public void dispose() {
+        if (monkeyTimer != null && monkeyTimer.isRunning()) {
+            monkeyTimer.stop();
+        }
+        super.dispose();
+    }
+
     
 }
