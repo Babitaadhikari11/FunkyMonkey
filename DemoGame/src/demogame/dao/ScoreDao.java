@@ -1,64 +1,96 @@
 package demogame.dao;
 
-import demogame.util.DatabaseConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class ScoreDao {
-
-    /**
-     * The only constructor needed. It's empty.
-     */
-    public ScoreDao() {
+    private static final Logger LOGGER = Logger.getLogger(ScoreDao.class.getName());
+    
+    private final Connection connection;
+    
+    // SQL queries
+    private static final String INSERT_SCORE = 
+        "INSERT INTO game_scores (user_id, score, date_created) VALUES (?, ?, CURRENT_TIMESTAMP)";
+    private static final String GET_HIGH_SCORES = 
+        "SELECT * FROM game_scores WHERE user_id = ? ORDER BY score DESC LIMIT ?";
+    private static final String GET_BEST_SCORE = 
+        "SELECT MAX(score) as best_score FROM game_scores WHERE user_id = ?";
+    
+    public ScoreDao(Connection connection) {
+        if (connection == null) {
+            throw new IllegalArgumentException("Database connection cannot be null");
+        }
+        this.connection = connection;
     }
 
-    /**
-     * This method is now self-contained and safe. It gets its own connection
-     * and closes it automatically.
-     * @param userId The ID of the user.
-     * @param score The score to save.
-     * @return true if successful, false otherwise.
-     */
-    public boolean insertScore(int userId, int score) {
-        String sql = "INSERT INTO scores (user_id, score) VALUES (?, ?)";
-
-        // This method now gets its own connection, making it much safer.
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setInt(1, userId);
-            stmt.setInt(2, score);
-            stmt.executeUpdate();
-            return true;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public boolean insertScore(int userId, int score) throws SQLException {
+        if (userId <= 0) {
+            LOGGER.warning("Invalid user ID provided: " + userId);
             return false;
         }
+
+        try (PreparedStatement stmt = connection.prepareStatement(INSERT_SCORE)) {
+            stmt.setInt(1, userId);
+            stmt.setInt(2, score);
+            
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error inserting score for user " + userId, e);
+            throw e;
+        }
     }
 
-    /**
-     * Gets the number of unique users who have played at least once.
-     * This is needed for the "Active Users" panel on your dashboard.
-     * @return The count of unique users with scores.
-     */
-    public int getActiveUserCount() {
-        String sql = "SELECT COUNT(DISTINCT user_id) FROM scores";
+    public List<Integer> getHighScores(int userId, int limit) throws SQLException {
+        List<Integer> scores = new ArrayList<>();
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
-
-            if (rs.next()) {
-                return rs.getInt(1);
+        try (PreparedStatement stmt = connection.prepareStatement(GET_HIGH_SCORES)) {
+            stmt.setInt(1, userId);
+            stmt.setInt(2, limit);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    scores.add(rs.getInt("score"));
+                }
             }
-
         } catch (SQLException e) {
-            System.err.println("Failed to get active user count: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error retrieving high scores for user " + userId, e);
+            throw e;
         }
-        return 0; // Return 0 if there's an error
+        
+        return scores;
+    }
+
+    public int getBestScore(int userId) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement(GET_BEST_SCORE)) {
+            stmt.setInt(1, userId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("best_score");
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error retrieving best score for user " + userId, e);
+            throw e;
+        }
+        
+        return 0;
+    }
+
+    // Method to check if the database connection is valid
+    public boolean isConnectionValid() {
+        try {
+            return connection != null && !connection.isClosed();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error checking database connection", e);
+            return false;
+        }
     }
 }
