@@ -30,6 +30,7 @@ public class UserData {
         this.username = username;
         this.email = email;
         this.password = password;
+
     }
 
     // Getters and setters
@@ -64,4 +65,6 @@ public class UserData {
     public void setPassword(String password) {
         this.password = password;
     }
+
 }
+

@@ -30,6 +30,7 @@ public class GameController {
         isGameRunning = false;
     }
 
+
     private void initDatabase() {
         try {
             Connection conn = DatabaseConnection.getConnection();
@@ -41,6 +42,7 @@ public class GameController {
                 "Error", 
                 JOptionPane.ERROR_MESSAGE);
         }
+
     }
 
     public void showMenu() {

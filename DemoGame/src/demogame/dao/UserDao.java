@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import javax.imageio.ImageIO;
 import java.sql.*;
 
+
 public class UserDao {
     private String errorMessage;
 
@@ -37,6 +38,7 @@ public class UserDao {
                 ResultSet rs = stmt.executeQuery();
                 
                 if (rs.next()) {
+
                     return new UserData(
                         rs.getInt("id"),
                         rs.getString("username"),
@@ -50,13 +52,16 @@ public class UserDao {
             }
         } catch (SQLException e) {
             handleSQLException("Authentication failed", e);
+
             return null;
         } finally {
             closeConnection(connection);
         }
     }
 
+
     // Register new user
+
     public boolean register(UserData user) {
         Connection connection = null;
         this.errorMessage = null;
@@ -149,6 +154,7 @@ public class UserDao {
         } catch (SQLException e) {
             rollbackTransaction(connection);
             handleSQLException("Username update failed", e);
+
             return false;
         } finally {
             closeConnection(connection);
@@ -243,6 +249,7 @@ public class UserDao {
         } catch (SQLException e) {
             rollbackTransaction(connection);
             handleSQLException("Failed to delete user", e);
+
             return false;
         } finally {
             closeConnection(connection);
@@ -388,4 +395,5 @@ public class UserDao {
     public String getErrorMessage() {
         return errorMessage;
     }
+
 }

@@ -5,12 +5,17 @@ import demogame.model.UserData;
 import demogame.view.LoginView;
 import demogame.view.MenuView;
 import demogame.view.SignUpView;
+
+import javax.swing.JOptionPane; // Added for pop-up messages
+
 import demogame.view.LoadingView;
+
 import javax.swing.SwingUtilities;
 
 public class LoginController {
     private UserDao userDAO;
     private LoginView view;
+
     private int loggedInUserId = -1;
     private String loggedInUsername;
 
@@ -47,6 +52,7 @@ public class LoginController {
         }
         return true;
     }
+
 
     private void authenticateUser(String username, String password) {
         try {
@@ -89,6 +95,7 @@ public class LoginController {
             menuView.setVisible(true);
             view.dispose(); // Clean up login view
         });
+
     }
 
     public void startGame() {
@@ -104,7 +111,6 @@ public class LoginController {
             }
         });
     }
-
     // Getters and utility methods
     public int getLoggedInUserId() {
         return loggedInUserId;
@@ -133,4 +139,5 @@ public class LoginController {
             view.showError(message + "\nError: " + e.getMessage());
         });
     }
+
 }
