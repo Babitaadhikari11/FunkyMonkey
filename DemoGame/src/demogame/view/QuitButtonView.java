@@ -87,6 +87,18 @@ public class QuitButtonView {
         
         g2d.dispose();
     }
+      // Optional: Add method to change text color
+    public void setTextColor(Color color) {
+        setForeground(color);
+        repaint();
+    }
+    
+    // Optional: Add method to change background color
+    public void setButtonBackground(Color color) {
+        setBackground(color);
+        repaint();
+    }
+
 
     }
 
