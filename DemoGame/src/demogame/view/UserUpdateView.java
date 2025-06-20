@@ -41,5 +41,45 @@ public class UserUpdateView {
         addProfileSection(mainPanel, currentUsername, currentEmail);
         addButtons(mainPanel);
     }
+    private RoundedPanel createRoundedPanel() {
+        RoundedPanel mainPanel = new RoundedPanel(30);
+        mainPanel.setBackground(new Color(255, 250, 205));
+        mainPanel.setLayout(null);
+        
+        int panelWidth = 600;
+        int panelHeight = 700;
+        int x = (1200 - panelWidth) / 2;
+        int y = (800 - panelHeight) / 2;
+        mainPanel.setBounds(x, y, panelWidth, panelHeight);
+        
+        return mainPanel;
+    }
+    //optional
+       private void addSwingingMonkey(RoundedPanel mainPanel) {
+        try {
+            ImageIcon monkeyIcon = new ImageIcon(getClass().getResource("/resources/mon.png"));
+            Image scaledMonkey = monkeyIcon.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
+            monkeyLabel = new JLabel(new ImageIcon(scaledMonkey));
+            monkeyLabel.setBounds(monkeyX, 20, 80, 80);
+            mainPanel.add(monkeyLabel);
+
+            setupMonkeyAnimation();
+        } catch (Exception e) {
+            System.err.println("Monkey image not found: " + e.getMessage());
+        }
+    }
+    private void setupMonkeyAnimation() {
+        monkeyTimer = new Timer(50, e -> {
+            if (movingRight) {
+                monkeyX += 5;
+                if (monkeyX >= 520) movingRight = false;
+            } else {
+                monkeyX -= 5;
+                if (monkeyX <= 0) movingRight = true;
+            }
+            monkeyLabel.setLocation(monkeyX, 20);
+        });
+        monkeyTimer.start();
+    }
     
 }
