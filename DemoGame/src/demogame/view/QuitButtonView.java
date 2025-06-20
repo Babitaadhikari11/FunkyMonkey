@@ -62,6 +62,32 @@ public class QuitButtonView {
                 }
             }
         });
+         @Override
+    protected void paintComponent(Graphics g) {
+        Graphics2D g2d = (Graphics2D) g.create();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
+                            RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, 
+                            RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        
+        // Draw background with slight transparency
+        g2d.setColor(getBackground());
+        g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+        
+        // Draw text
+        FontMetrics fm = g2d.getFontMetrics(getFont());
+        Rectangle stringBounds = fm.getStringBounds(getText(), g2d).getBounds();
+        
+        int textX = (getWidth() - stringBounds.width) / 2;
+        int textY = (getHeight() - stringBounds.height) / 2 + fm.getAscent();
+        
+        g2d.setColor(getForeground());
+        g2d.setFont(getFont());
+        g2d.drawString(getText(), textX, textY);
+        
+        g2d.dispose();
+    }
+
     }
 
 
