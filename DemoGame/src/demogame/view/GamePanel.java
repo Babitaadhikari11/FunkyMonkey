@@ -235,9 +235,9 @@ public class GamePanel extends JPanel implements ActionListener {
         drawGameObjects(g2d);
         drawUI(g2d);
         
-        if (SHOW_COLLISION_BOXES) {
-            drawDebugInfo(g2d);
-        }
+        // if (SHOW_COLLISION_BOXES) {
+        //     drawDebugInfo(g2d);
+        // }
         
         if (tutorial.isVisible()) {
             drawTutorialOverlay(g2d);
@@ -356,15 +356,15 @@ public class GamePanel extends JPanel implements ActionListener {
         // Implement game over overlay if needed
     }
 
-    private void drawDebugInfo(Graphics2D g2d) {
-        g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Arial", Font.PLAIN, 12));
-        if (monkey != null) {
-            g2d.drawString("Monkey Position: " + monkey.getX() + ", " + monkey.getY(), 10, 20);
-            g2d.drawString("Frame: " + monkey.getCurrentFrameNumber(), 10, 40);
-            g2d.drawString("Ground Level: " + GROUND_LEVEL, 10, 60);
-        }
-    }
+    // private void drawDebugInfo(Graphics2D g2d) {
+    //     g2d.setColor(Color.WHITE);
+    //     g2d.setFont(new Font("Arial", Font.PLAIN, 12));
+    //     if (monkey != null) {
+    //         g2d.drawString("Monkey Position: " + monkey.getX() + ", " + monkey.getY(), 10, 20);
+    //         g2d.drawString("Frame: " + monkey.getCurrentFrameNumber(), 10, 40);
+    //         g2d.drawString("Ground Level: " + GROUND_LEVEL, 10, 60);
+    //     }
+    // }
 
     private void handleGameOver() {
         isGameOver = true;
