@@ -71,8 +71,8 @@ public class ObstacleController {
     // creates and adds a new obstacle at screen right side
     private void spawnObstacle() {
         int obstacleX = PANEL_WIDTH + SPAWN_OFFSET;
-        int obstacleHeight =90;
-        int obstacleY = GROUND_LEVEL - obstacleHeight+20; // slightly raised
+ 
+        int obstacleY = GROUND_LEVEL - 120; // slightly raised
         
 
         Obstacle obstacle = new Obstacle(obstacleX, obstacleY, 70, 90);
