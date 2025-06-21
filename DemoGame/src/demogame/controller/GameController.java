@@ -211,14 +211,13 @@ import demogame.model.UserData; // added import for user data
 import demogame.util.DatabaseConnection;
 import demogame.view.GameView;
 import demogame.view.MenuView;
-import javax.swing.*;
-import java.awt.Font;
 import java.sql.SQLException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.*;
 
 // manages game flow
 public class GameController {
@@ -303,11 +302,11 @@ public class GameController {
         loadingFrame.setLocationRelativeTo(null);
         loadingFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         
-        JLabel loadingLabel = new JLabel("Loading game...", SwingConstants.CENTER);
-        loadingLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        loadingFrame.add(loadingLabel);
+        // JLabel loadingLabel = new JLabel("Loading game...", SwingConstants.CENTER);
+        // loadingLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        // loadingFrame.add(loadingLabel);
         
-        loadingFrame.setVisible(true);
+        // loadingFrame.setVisible(true);
         
         try {
             Thread.sleep(1000);
