@@ -1,4 +1,5 @@
 package demogame.controller;
+
 import demogame.model.Obstacle;
 import demogame.model.Monkey;
 import demogame.view.GamePanel;
@@ -6,19 +7,21 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class ObstacleController {
-     // Constants
+    // constants for obstacle spawning and spacing
     private static final int MIN_OBSTACLE_SPACING = 500;
     private static final int SPAWN_INTERVAL = 180;
     private static final int MAX_OBSTACLES = 3;
     private static final int SPAWN_OFFSET = 300;
     
-    // Game properties
+    // game properties
     private final int PANEL_WIDTH;
     private final int GROUND_LEVEL;
     private final GamePanel gamePanel;
     private final ArrayList<Obstacle> obstacles;
     private final Random random;
     private int spawnTimer;
+
+  
     public ObstacleController(int panelWidth, int groundLevel, GamePanel gamePanel) {
         this.PANEL_WIDTH = panelWidth;
         this.GROUND_LEVEL = groundLevel;
@@ -27,17 +30,19 @@ public class ObstacleController {
         this.random = new Random();
         this.spawnTimer = 0;
     }
+
+    // updates obstacles ->removes off-screen , moves existing, give new
     public void update() {
-        // Remove off-screen obstacles
+  
         obstacles.removeIf(obstacle -> 
             obstacle.getX() + obstacle.getWidth() < 0);
         
-        // Update existing obstacles
+
         for (Obstacle obstacle : obstacles) {
             obstacle.update();
         }
         
-        // Spawn new obstacles
+  
         spawnTimer++;
         if (spawnTimer >= SPAWN_INTERVAL) {
             if (canSpawnObstacle()) {
@@ -46,13 +51,15 @@ public class ObstacleController {
             }
         }
     }
+
+    // checks if a new obstacle can be generated based on count and spacing
     private boolean canSpawnObstacle() {
-        // Don't spawn if too many obstacles
+        
         if (obstacles.size() >= MAX_OBSTACLES) {
             return false;
         }
 
-        // Check spacing from last obstacle
+  
         if (!obstacles.isEmpty()) {
             Obstacle lastObstacle = obstacles.get(obstacles.size() - 1);
             return lastObstacle.getX() < PANEL_WIDTH - MIN_OBSTACLE_SPACING;
@@ -60,32 +67,36 @@ public class ObstacleController {
 
         return true;
     }
-     private void spawnObstacle() {
-    int obstacleX = PANEL_WIDTH + SPAWN_OFFSET;
-    // Adjust Y position to match monkey's level
-    int obstacleY = GROUND_LEVEL - 110; // Move obstacles up slightly
-    
-    // Create new obstacle with slightly smaller size
-    Obstacle obstacle = new Obstacle(obstacleX, obstacleY, 70, 90);
-    obstacles.add(obstacle);
-}
-public boolean checkCollisions(Monkey monkey) {
+
+    // creates and adds a new obstacle at screen right side
+    private void spawnObstacle() {
+        int obstacleX = PANEL_WIDTH + SPAWN_OFFSET;
+ 
+        int obstacleY = GROUND_LEVEL - 110; // slightly raised
+        
+
+        Obstacle obstacle = new Obstacle(obstacleX, obstacleY, 70, 90);
+        obstacles.add(obstacle);
+    }
+
+    // checks if monkey collides with any obstacle
+    public boolean checkCollisions(Monkey monkey) {
         for (Obstacle obstacle : obstacles) {
             if (obstacle.checkCollision(monkey)) {
-                return true;
+                return true; // collision detected
             }
         }
         return false;
     }
 
+    // clears obstacles and resets timer for game restart
     public void restart() {
         obstacles.clear();
         spawnTimer = 0;
     }
 
+    // returns list of current obstacles
     public ArrayList<Obstacle> getObstacles() {
         return obstacles;
     }
-
-    
 }

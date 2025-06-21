@@ -15,7 +15,7 @@ public class MenuController {
         this.currentUser = currentUser;
         setupButtonListeners();
     }
-
+//in menu panel there are start update and quit , this method handle them
     private void setupButtonListeners() {
         // Start Game button
         view.getStartButton().addActionListener(e -> {
@@ -75,7 +75,7 @@ public class MenuController {
         });
     }
 
-    // Method to show menu again (called from UserUpdateController)
+    // Method to show menu again when we click on return to menu from userupdate pane
     public void showMenu() {
         SwingUtilities.invokeLater(() -> {
             view.setVisible(true);

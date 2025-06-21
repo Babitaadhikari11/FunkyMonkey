@@ -10,6 +10,9 @@ import demogame.model.TutorialOverlay;
 import demogame.controller.BananaController;
 import demogame.controller.MonkeyController;
 import demogame.controller.ObstacleController;
+import demogame.controller.ScoreController;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class GamePanel extends JPanel implements ActionListener {
     // Constants
@@ -40,7 +43,7 @@ public class GamePanel extends JPanel implements ActionListener {
     private Timer controlsFadeTimer;
     private JButton quitButton;
     private TutorialOverlay tutorial;
-    private GameView gameView;  // Added GameView reference
+    private GameView gameView;
 
     // Game objects
     private Timer gameLoop;
@@ -50,6 +53,8 @@ public class GamePanel extends JPanel implements ActionListener {
     private BananaController bananaController;
     private BananaView bananaView;
     private SpriteManager spriteManager;
+    private ScoreController scoreController; // Added ScoreController field
+    private static final Logger LOGGER = Logger.getLogger(GamePanel.class.getName()); // Added Logger
 
     // Background
     private Image jungle1;
@@ -67,13 +72,28 @@ public class GamePanel extends JPanel implements ActionListener {
         startGameLoop();
     }
 
+    public BananaController getBananaController() {
+        return bananaController; // Return the BananaController instance
+    }
+
     private void initializePanel() {
         setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
         setBackground(Color.BLACK);
         setDoubleBuffered(true);
         setFocusable(true);
         
-        bananaController = new BananaController(PANEL_WIDTH, GROUND_LEVEL);
+        // Initialize ScoreController with userId from GameController and scoreLabel from GameView
+        scoreController = new ScoreController(gameView.getGameController().getUserId(), gameView.getScoreLabel());
+        // Pass ScoreController to BananaController
+        bananaController = new BananaController(PANEL_WIDTH, GROUND_LEVEL, scoreController);
+        // Add score listener to connect BananaController to GameView
+        bananaController.addScoreListener(newScore -> {
+            if (gameView != null) {
+                LOGGER.info("Score update from banana: " + newScore);
+                gameView.updateScore(newScore);
+            }
+        });
+        
         bananaView = new BananaView();
         
         quitButton = new JButton("Quit Game");
@@ -87,6 +107,8 @@ public class GamePanel extends JPanel implements ActionListener {
         });
     }
 
+    // ... (rest of the GamePanel code remains unchanged, included below for completeness)
+
     private void loadResources() {
         try {
             jungle1 = new ImageIcon(getClass().getResource("/resources/Bg1.jpg")).getImage();
@@ -98,10 +120,9 @@ public class GamePanel extends JPanel implements ActionListener {
 
             spriteManager = new SpriteManager();
             
-            System.out.println("Resources loaded successfully");
+            LOGGER.info("Resources loaded successfully");
         } catch (Exception e) {
-            System.err.println("Error loading resources: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error loading resources", e);
         }
     }
 
@@ -130,7 +151,8 @@ public class GamePanel extends JPanel implements ActionListener {
         }
         repaint();
     }
-        private void updateGame() {
+
+    private void updateGame() {
         if (!tutorialActive) {
             updateBackground();
             updateMonkey();
@@ -345,15 +367,30 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     private void handleGameOver() {
-    isGameOver = true;
-    final int finalScore = bananaController.getScore();
-    
-    if (gameView != null) {
-        gameView.updateScore(finalScore);
-        // Show game over dialog through GameView
-        SwingUtilities.invokeLater(() -> {
+        isGameOver = true;
+        final int finalScore = bananaController.getScore();
+        
+        if (gameView != null) {
+            gameView.updateScore(finalScore);
+            // Show game over dialog through GameView
+            SwingUtilities.invokeLater(() -> {
+                int choice = JOptionPane.showConfirmDialog(
+                    gameView,
+                    "Game Over! Score: " + finalScore + "\nTry again?",
+                    "Game Over",
+                    JOptionPane.YES_NO_OPTION
+                );
+                
+                if (choice == JOptionPane.YES_OPTION) {
+                    restartGame();
+                } else {
+                    gameView.dispose();
+                }
+            });
+        } else {
+            // Fallback if GameView is not available
             int choice = JOptionPane.showConfirmDialog(
-                gameView,
+                this,
                 "Game Over! Score: " + finalScore + "\nTry again?",
                 "Game Over",
                 JOptionPane.YES_NO_OPTION
@@ -362,25 +399,10 @@ public class GamePanel extends JPanel implements ActionListener {
             if (choice == JOptionPane.YES_OPTION) {
                 restartGame();
             } else {
-                gameView.dispose();
+                System.exit(0);
             }
-        });
-    } else {
-        // Fallback if GameView is not available
-        int choice = JOptionPane.showConfirmDialog(
-            this,
-            "Game Over! Score: " + finalScore + "\nTry again?",
-            "Game Over",
-            JOptionPane.YES_NO_OPTION
-        );
-        
-        if (choice == JOptionPane.YES_OPTION) {
-            restartGame();
-        } else {
-            System.exit(0);
         }
     }
-}
 
     public void restartGame() {
         isGameOver = false;
@@ -448,6 +470,9 @@ public class GamePanel extends JPanel implements ActionListener {
     public void cleanup() {
         if (gameLoop != null) {
             gameLoop.stop();
+        }
+        if (scoreController != null) {
+            scoreController.dispose(); // Cleanup ScoreController
         }
     }
 }

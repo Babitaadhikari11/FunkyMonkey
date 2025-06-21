@@ -1,22 +1,55 @@
+
 package demogame;
 
 import demogame.controller.LoginController;
 import demogame.util.DatabaseConnection;
 import demogame.view.LoginView;
 import javax.swing.SwingUtilities;
+import java.sql.Connection;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class DemoGame {
+    private static final Logger LOGGER = Logger.getLogger(DemoGame.class.getName());
+
     public static void main(String[] args) {
+        // Test database connection at startup
+        testDatabaseConnection();
+
         SwingUtilities.invokeLater(() -> {
             LoginView loginPanel = new LoginView();
             new LoginController(loginPanel);
             loginPanel.setVisible(true);
         });
-        
 
+        // Add shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            DatabaseConnection.closeConnection();
+            LOGGER.info("Application shutting down, cleaning up resources...");
+            cleanup();
         }));
-        
+    }
+
+    private static void testDatabaseConnection() {
+        try {
+            if (DatabaseConnection.testConnection()) {
+                LOGGER.info("Database connection test successful");
+            } else {
+                LOGGER.severe("Database connection test failed");
+                System.exit(1);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error testing database connection", e);
+            System.exit(1);
+        }
+    }
+
+    private static void cleanup() {
+        try {
+            // Since we're not keeping static connections anymore,
+            // we just log the cleanup
+            LOGGER.info("Application cleanup completed");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error during cleanup", e);
+        }
     }
 }

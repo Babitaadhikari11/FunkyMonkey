@@ -149,18 +149,39 @@ public class Obstacle {
         return distanceToObstacle > 0 && distanceToObstacle < optimalJumpDistance;
     }
      // Getters
-    public int getX() { return x; }
-    public int getY() { return y; }
-    public int getWidth() { return width; }
-    public int getHeight() { return height; }
-    public boolean isActive() { return isActive; }
-    public Rectangle getBounds() { return new Rectangle(bounds); }
-    public Rectangle getCollisionBounds() { return new Rectangle(collisionBounds); }
-    public float getSpeed() { return speed; }
+    public int getX() {
+         return x; 
+        }
+    public int getY() {
+         return y; 
+        }
+    public int getWidth() { 
+        return width; 
+    }
+    public int getHeight() {
+         return height; 
+        }
+    public boolean isActive() { 
+        return isActive;
+     }
+    public Rectangle getBounds() { 
+        return new Rectangle(bounds);
+     }
+
+    public Rectangle getCollisionBounds() { 
+        return new Rectangle(collisionBounds);
+     }
+    public float getSpeed() { 
+        return speed; 
+    }
 
     // Setters
-    public void setActive(boolean active) { this.isActive = active; }
-    public void setSpeed(float speed) { this.speed = speed; }
+    public void setActive(boolean active) { 
+        this.isActive = active; 
+    }
+    public void setSpeed(float speed) { 
+        this.speed = speed; 
+    }
     public void reset() {
         wasJumpedOver = false;
         isActive = true;

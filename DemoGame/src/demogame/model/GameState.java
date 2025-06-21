@@ -18,17 +18,25 @@ public class GameState {
 
     public void update() {
         distanceTraveled++;
-        // Level up every LEVEL_UP_SCORE points
+        // level up every LEVEL_UP_SCORE points
         level = 1 + (score / LEVEL_UP_SCORE);
-        // Increase game speed with level
+        // increase game speed with level
         gameSpeed = 1.0f + (level - 1) * SPEED_INCREMENT;
     }
 
     // Getters and setters
-    public int getScore() { return score; }
-    public int getLevel() { return level; }
-    public float getGameSpeed() { return gameSpeed; }
-    public int getDistanceTraveled() { return distanceTraveled; }
+    public int getScore() { 
+        return score; 
+    }
+    public int getLevel() { 
+        return level; 
+    }
+    public float getGameSpeed() {
+         return gameSpeed;
+         }
+    public int getDistanceTraveled() { 
+        return distanceTraveled; 
+    }
     
     public void addScore(int points) {
         score += points;

@@ -1,3 +1,4 @@
+
 package demogame.view;
 
 /*
@@ -6,6 +7,8 @@ package demogame.view;
  */
 
 import javax.swing.JFrame;
+import java.awt.Color;
+import java.awt.Font;
 
 /**
  *
@@ -18,6 +21,9 @@ public class AdminView3 extends javax.swing.JFrame {
      */
     public AdminView3() {
         initComponents();
+        setMinimumSize(new java.awt.Dimension(1200, 600)); // Standardized
+        setSize(1200, 600); // Standardized
+        setLocationRelativeTo(null); // Center the window
     }
 
     /**
@@ -59,6 +65,7 @@ public class AdminView3 extends javax.swing.JFrame {
         jPanel4.setBackground(new java.awt.Color(242, 244, 230));
         jPanel4.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
+        jLabel2.setFont(new java.awt.Font("Arial", Font.BOLD, 14)); // Standardized font
         jLabel2.setText("Game Dashboard");
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
@@ -78,12 +85,15 @@ public class AdminView3 extends javax.swing.JFrame {
                 .addContainerGap(20, Short.MAX_VALUE))
         );
 
+        jButton1.setFont(new java.awt.Font("Arial", Font.BOLD, 14)); // Standardized font
         jButton1.setText("Dashboard");
         jButton1.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
+        jButton2.setFont(new java.awt.Font("Arial", Font.BOLD, 14)); // Standardized font
         jButton2.setText("User");
         jButton2.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
+        jButton3.setFont(new java.awt.Font("Arial", Font.BOLD, 14)); // Standardized font
         jButton3.setText("Notification");
         jButton3.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
@@ -116,10 +126,12 @@ public class AdminView3 extends javax.swing.JFrame {
         jPanel5.setBackground(new java.awt.Color(207, 222, 212));
         jPanel5.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        jLabel3.setFont(new java.awt.Font("Geeza Pro", 0, 24)); // NOI18N
+        jLabel3.setFont(new java.awt.Font("Geeza Pro", Font.PLAIN, 24)); // Standardized font
         jLabel3.setText("Welcome to Admin Panel");
 
+        jButton4.setFont(new java.awt.Font("Arial", Font.BOLD, 14)); // Standardized font
         jButton4.setText("Push Notification");
+        jButton4.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
@@ -142,8 +154,10 @@ public class AdminView3 extends javax.swing.JFrame {
                 .addContainerGap(14, Short.MAX_VALUE))
         );
 
+        jLabel1.setFont(new java.awt.Font("Arial", Font.BOLD, 14)); // Standardized font
         jLabel1.setText("Game reviews");
 
+        jList1.setFont(new java.awt.Font("Arial", Font.PLAIN, 14)); // Standardized font
         jList1.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
@@ -175,8 +189,10 @@ public class AdminView3 extends javax.swing.JFrame {
                 .addContainerGap(37, Short.MAX_VALUE))
         );
 
+        jLabel4.setFont(new java.awt.Font("Arial", Font.BOLD, 14)); // Standardized font
         jLabel4.setText("Write notification to the user");
 
+        jTextField1.setFont(new java.awt.Font("Arial", Font.PLAIN, 14)); // Standardized font
         jTextField1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextField1ActionPerformed(evt);
