@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+    <classpathentry kind="src" path="src"/> <!-- Source folder -->
+    <classpathentry kind="lib" path="lib/javax.mail-1.6.7.jar"/> <!-- Mail API -->
+    <classpathentry kind="lib" path="lib/jakarta.activation-api-1.2.2.jar"/> <!-- Activation API for Java 9+ -->
+    <!-- Use <classpathentry kind="lib" path="lib/activation-1.1.1.jar"/> for Java 8 instead -->
+    
+    <classpathentry kind="lib" path="lib/mysql-connector-java-8.0.33.jar"/> <!-- MySQL driver -->
+<classpathentry kind="lib" path="lib/bcrypt-0.4.jar"/>
+    <classpathentry kind="output" path="bin"/> <!-- Output folder for compiled classes -->
+<classpathentry kind="lib" path="lib/javax.activation-1.2.0.jar"/>
+</classpath>
