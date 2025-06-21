@@ -128,7 +128,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
     private void setupGame() {
         int monkeyStartX = 50;
-        int monkeyStartY = GROUND_LEVEL - MONKEY_HEIGHT - 50;
+        int monkeyStartY = GROUND_LEVEL - MONKEY_HEIGHT ;
         monkey = new Monkey(monkeyStartX, monkeyStartY);
 
         monkeyController = new MonkeyController(monkey);
@@ -260,7 +260,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
     private void drawGround(Graphics2D g2d) {
         g2d.setColor(Color.GREEN);
-        g2d.drawLine(0, GROUND_LEVEL, PANEL_WIDTH, GROUND_LEVEL);
+       // g2d.drawLine(0, GROUND_LEVEL, PANEL_WIDTH, GROUND_LEVEL);
     }
 
     private void drawGameObjects(Graphics2D g2d) {
