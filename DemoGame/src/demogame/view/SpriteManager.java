@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class SpriteManager {
     private Map<Integer, BufferedImage> sprites;
-    private static final int TOTAL_FRAMES = 14; // Adjust based on  sprite count
+    private static final int TOTAL_FRAMES = 24; // Adjust based on  sprite count
 
     public SpriteManager() {
         sprites = new HashMap<>();

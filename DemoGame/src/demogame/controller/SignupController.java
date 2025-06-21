@@ -11,12 +11,14 @@ public class SignupController {
     private UserDao userDAO;
     private SignUpView view;
 
+    
     public SignupController(SignUpView view) {
         this.view = view;
         this.userDAO = new UserDao();
         initializeListeners();
     }
 
+    // listeners for signup button, login link window close
     private void initializeListeners() {
         view.getSignUpButton().addActionListener(e -> handleSignUp());
         view.getLoginLink().addMouseListener(new MouseAdapter() {
@@ -34,6 +36,7 @@ public class SignupController {
         });
     }
 
+    // handles signup process validates input and registers user
     private void handleSignUp() {
         view.getSignUpButton().setEnabled(false);
         
@@ -43,6 +46,7 @@ public class SignupController {
             String password = view.getPassword();
             String confirmPassword = view.getConfirmPassword();
 
+            // validate inputs
             if (!validateInputs(username, email, password, confirmPassword)) {
                 view.getSignUpButton().setEnabled(true);
                 return;
@@ -50,6 +54,7 @@ public class SignupController {
 
             UserData user = new UserData(username, email, password);
             
+         
             new Thread(() -> {
                 try {
                     final boolean success = userDAO.register(user);
@@ -77,7 +82,9 @@ public class SignupController {
         }
     }
 
+    // validates username, email, and password requirements
     private boolean validateInputs(String username, String email, String password, String confirmPassword) {
+        // check for empty fields
         if (username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             view.showError("All fields are required.");
             return false;
@@ -88,6 +95,7 @@ public class SignupController {
             return false;
         }
 
+        // restrict username to alphanumeric and underscores
         if (!username.matches("^[a-zA-Z0-9_]+$")) {
             view.showError("Username can only contain letters, numbers, and underscores.");
             return false;
@@ -113,6 +121,7 @@ public class SignupController {
             return false;
         }
 
+        //  password complexity
         if (!password.matches(".*[A-Z].*")) {
             view.showError("Password must contain at least one uppercase letter.");
             return false;
@@ -136,21 +145,23 @@ public class SignupController {
         return true;
     }
 
+    // checks email format using regex
     private boolean isValidEmail(String email) {
         String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
         return email.matches(emailRegex);
     }
 
+    // navigates to login
     private void handleSuccessfulRegistration() {
         try {
             view.showSuccess("Registration successful! Please log in.");
-            Thread.sleep(1500);
+            Thread.sleep(1500); // brief delay for success message
             navigateToLoginPanel();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
-
+// error show
     private void handleFailedRegistration() {
         String errorMessage = userDAO.getErrorMessage();
         if (errorMessage == null) {
@@ -159,11 +170,13 @@ public class SignupController {
         view.showError(errorMessage);
     }
 
+    // navigates to login screen 
     private void handleLoginLink() {
         cleanup();
         navigateToLoginPanel();
     }
 
+ 
     private void navigateToLoginPanel() {
         SwingUtilities.invokeLater(() -> {
             view.setVisible(false);
@@ -174,6 +187,7 @@ public class SignupController {
         });
     }
 
+    
     private void cleanup() {
         if (view != null) {
             view.dispose();

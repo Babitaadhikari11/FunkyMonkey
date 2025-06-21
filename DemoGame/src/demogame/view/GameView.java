@@ -4,8 +4,12 @@ import demogame.controller.GameController;
 import demogame.model.GameOverListener;
 import javax.swing.*;
 import java.awt.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class GameView extends JFrame implements GameOverListener {
+    private static final Logger LOGGER = Logger.getLogger(GameView.class.getName());
+    
     private JLabel scoreLabel;
     private GamePanel gamePanel;
     private GameController gameController;
@@ -38,6 +42,9 @@ public class GameView extends JFrame implements GameOverListener {
         scoreLabel.setBounds(20, 10, 200, 30);
         layeredPane.add(scoreLabel, JLayeredPane.PALETTE_LAYER);
 
+        // Set BananaController in GameController
+        gameController.setBananaController(gamePanel.getBananaController());
+
         setupWindowListener();
     }
 
@@ -45,6 +52,7 @@ public class GameView extends JFrame implements GameOverListener {
         addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                LOGGER.info("Window closing, saving score: " + currentScore);
                 handleGameExit();
             }
         });
@@ -53,6 +61,7 @@ public class GameView extends JFrame implements GameOverListener {
     @Override
     public void onGameOver() {
         int finalScore = getCurrentScore();
+        LOGGER.info("Game over, saving final score: " + finalScore);
         gameController.saveScore(finalScore);
         
         SwingUtilities.invokeLater(() -> {
@@ -101,9 +110,16 @@ public class GameView extends JFrame implements GameOverListener {
 
     public void updateScore(int score) {
         this.currentScore = score;
+        LOGGER.info("Updating score display: " + score);
         SwingUtilities.invokeLater(() -> {
             scoreLabel.setText("Score: " + score);
         });
+    }
+
+    public void updateScoreDisplay(int score) {
+        if (scoreLabel != null) {
+            scoreLabel.setText("Score: " + score);
+        }
     }
 
     public void restartGame() {
@@ -115,6 +131,7 @@ public class GameView extends JFrame implements GameOverListener {
     }
 
     private void handleGameExit() {
+        LOGGER.info("Exiting game, saving score: " + currentScore);
         gameController.saveScore(currentScore);
         dispose();
         gameController.showMenu();
@@ -134,6 +151,10 @@ public class GameView extends JFrame implements GameOverListener {
 
     public GameController getGameController() {
         return gameController;
+    }
+
+    public JLabel getScoreLabel() {
+        return scoreLabel;
     }
 
     @Override

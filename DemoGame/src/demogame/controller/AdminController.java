@@ -6,161 +6,543 @@ import demogame.model.UserData;
 import demogame.view.AdminView1;
 import demogame.view.AdminView2;
 import demogame.view.AdminView3;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
-public class AdminController {
+import java.sql.Connection;
+import java.sql.SQLException;
+import demogame.util.DatabaseConnection;
+// hangle admin interface navigations
+public class AdminController implements ScoreDao.ScoreUpdateListener {
+    // Logger for logging applications events and errors-> this is java.util.logging component
     private static final Logger LOGGER = Logger.getLogger(AdminController.class.getName());
 
     private final UserDao userDao;
-    private final ScoreDao scoreDao;
+    private ScoreDao scoreDao;
     private final AdminView1 dashboardFrame;
     private final AdminView2 userFrame;
     private final AdminView3 notificationFrame;
+    private AdminView1 adminView1;
+    private AdminView2 adminView2; //optional
+    private AdminView3 adminView3;
+    private boolean listenerRegistered = false; // this is added  to track listener registration
 
     public AdminController() {
-        LOGGER.info("Initializing AdminController");
-
-        this.userDao = new UserDao();
-        this.scoreDao = new ScoreDao();
-        
-        this.dashboardFrame = new AdminView1();
-        this.userFrame = new AdminView2(this); 
-        this.notificationFrame = new AdminView3();
-
-        configureFrame(dashboardFrame, "Dashboard");
-        configureFrame(userFrame, "User Management");
-        configureFrame(notificationFrame, "Notifications");
-
-        setupNavigation();
-        loadDashboardData();
-        showDashboard();
-    }
-
-    public UserData getUserDetails(String username) {
-        return userDao.getUserByUsername(username);
-    }
-
-    /**
-     * CORRECTED: Now preserves the user's original role when updating.
-     */
-    public void updateUser(String originalUsername, String newUsername, String newEmail, String newPassword) {
-        UserData originalUser = userDao.getUserByUsername(originalUsername);
-        if (originalUser == null) {
-            JOptionPane.showMessageDialog(userFrame, "Original user not found. Cannot update.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
+        userDao = new UserDao();
+        userFrame = new AdminView2(this); // initializing  the final field userFrame
+        try {
+            // check for admin user existence in database
+            userDao.ensureAdminUser();
+            LOGGER.info("Admin user ensured successfully");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error ensuring admin user", e);
+            e.printStackTrace();
         }
-
-        // Create the updated user, passing the original role to preserve it.
-        UserData updatedUser = new UserData(originalUser.getId(), newUsername, newEmail, newPassword, originalUser.getRole());
-        
-        boolean success = userDao.updateUser(updatedUser);
-        if (success) {
-            JOptionPane.showMessageDialog(userFrame, "User updated successfully!");
-            loadAndDisplayUsers();
-        } else {
-            JOptionPane.showMessageDialog(userFrame, "Failed to update user.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-    
-    /**
-     * CORRECTED: Now sets the default role for a new user and refreshes the dashboard.
-     */
-    public void addUser(String name, String username, String email, String password) {
-        // Create the new user with the default role of 'player'.
-        UserData newUser = new UserData(0, username, email, password, "player");
-        
-        boolean success = userDao.register(newUser);
-        if (success) {
-            JOptionPane.showMessageDialog(userFrame, "User added successfully!");
-            loadAndDisplayUsers();
-            loadDashboardData(); // Refreshes dashboard stats
-        } else {
-            JOptionPane.showMessageDialog(userFrame, "Error adding user: " + userDao.getErrorMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    /**
-     * CORRECTED: Now refreshes the dashboard after deleting a user.
-     */
-    public void deleteUser(String username) {
-        if (username == null || username.isEmpty()) {
-            JOptionPane.showMessageDialog(userFrame, "Please select a user to delete.", "Warning", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        int response = JOptionPane.showConfirmDialog(userFrame, "Are you sure you want to delete the user '" + username + "'?\nThis action cannot be undone.", "Confirm Deletion", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-        if (response == JOptionPane.YES_OPTION) {
-            boolean success = userDao.deleteUserByUsername(username);
-            if (success) {
-                JOptionPane.showMessageDialog(userFrame, "User '" + username + "' has been deleted.");
-                loadAndDisplayUsers();
-                loadDashboardData(); // Refreshes dashboard stats
-            } else {
-                JOptionPane.showMessageDialog(userFrame, "Error deleting user.", "Error", JOptionPane.ERROR_MESSAGE);
+        // score logics
+        scoreDao = null;
+        int scoreDaoAttempts = 0;
+        final int MAX_SCORE_DAO_ATTEMPTS = 2; // Added for multiple attempts
+        while (scoreDao == null && scoreDaoAttempts < MAX_SCORE_DAO_ATTEMPTS) {
+            scoreDaoAttempts++;
+            try {
+                scoreDao = new ScoreDao();
+                LOGGER.info("ScoreDao initialized successfully on attempt " + scoreDaoAttempts);
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Error initializing ScoreDao on attempt " + scoreDaoAttempts, e);
+                e.printStackTrace();
             }
         }
+        if (scoreDao == null) {
+            LOGGER.severe("Failed to initialize ScoreDao after " + MAX_SCORE_DAO_ATTEMPTS + " attempts");
+        }
+        //acts as listener to makesure that scoredao initialized
+
+        try {
+            if (scoreDao != null) {
+                try {
+                    LOGGER.info("Attempting to add score update listener, AdminController instance: " + this + ", type: " + this.getClass().getName());
+                    scoreDao.addUpdateListener(this);
+                    listenerRegistered = true; //track success
+                    LOGGER.info("Score update listener added successfully");
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Failed to add score update listener, proceeding with initialization", e);
+                    e.printStackTrace();
+                    listenerRegistered = false; // track failure
+                    LOGGER.info("Continuing AdminController initialization despite listener registration failure");
+                }
+            } else {
+                LOGGER.severe("ScoreDao is null, cannot add score update listener, proceeding with initialization");
+                listenerRegistered = false; //  track failure
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error adding score update listener, proceeding with initialization", e);
+            e.printStackTrace();
+            listenerRegistered = false; //  track failure
+            LOGGER.info("Continuing AdminController initialization despite outer listener error");
+        }
+
+        // initializing adminView1
+        adminView1 = null;
+        try {
+            adminView1 = new AdminView1();
+            LOGGER.info("AdminView1 initialized successfully");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error initializing AdminView1", e);
+            e.printStackTrace();
+            // Fallback attempt
+            try {
+                adminView1 = new AdminView1();
+                LOGGER.info("AdminView1 fallback initialization successful");
+            } catch (Exception fallbackException) {
+                LOGGER.log(Level.SEVERE, "AdminView1 fallback initialization failed", fallbackException);
+                fallbackException.printStackTrace();
+            }
+        }
+
+        dashboardFrame = adminView1;
+        this.notificationFrame = new AdminView3();
+        // initialize
+        adminView2 = null;
+        try {
+            adminView2 = new AdminView2(this);
+            LOGGER.info("AdminView2 initialized successfully");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error initializing AdminView2", e);
+            e.printStackTrace();
+          
+            try {
+                adminView2 = new AdminView2(this);
+                LOGGER.info("AdminView2 fallback initialization successful");
+            } catch (Exception fallbackException) {
+                LOGGER.log(Level.SEVERE, "AdminView2 fallback initialization failed", fallbackException);
+                fallbackException.printStackTrace();
+            }
+        }
+
+        adminView3 = null;
+        try {
+            adminView3 = new AdminView3();
+            LOGGER.info("AdminView3 initialized successfully");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error initializing AdminView3", e);
+            e.printStackTrace();
+            
+            try {
+                adminView3 = new AdminView3();
+                LOGGER.info("AdminView3 fallback initialization successful");
+            } catch (Exception fallbackException) {
+                LOGGER.log(Level.SEVERE, "AdminView3 fallback initialization failed", fallbackException);
+                fallbackException.printStackTrace();
+            }
+        }
+        // checking for database connectiion
+
+        try {
+            verifyDatabaseConnection();
+            LOGGER.info("Database connection verified successfully");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error verifying database connection", e);
+            SwingUtilities.invokeLater(() -> {
+                JOptionPane.showMessageDialog(null,
+                    "Database connection failed: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            });
+        }
+
+        // navigation logic between buttons
+        try {
+            setupNavigation();
+            LOGGER.info("Navigation setup completed successfully");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error setting up navigation", e);
+            e.printStackTrace();
+        }
+
+        if (adminView1 != null) {
+            try {
+                adminView1.setAdminController(this);
+                adminView1.setVisible(true);
+                LOGGER.info("AdminView1 set visible successfully");
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Error setting AdminView1 controller or visibility", e);
+                e.printStackTrace();
+            }
+        } else {
+            LOGGER.severe("AdminView1 is null, cannot set controller or visibility");
+            SwingUtilities.invokeLater(() -> {
+                JOptionPane.showMessageDialog(null,
+                    "Failed to initialize AdminView1",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            });
+        }
+        // log initialization status
+        LOGGER.info("AdminController initialized, adminView1: " + (adminView1 != null));
+        LOGGER.info("DashboardFrame initialized: " + (dashboardFrame != null));
+        LOGGER.info("Listener registered: " + listenerRegistered); // Added to track listener status
+        if (dashboardFrame == null) {
+            SwingUtilities.invokeLater(() -> {
+                JOptionPane.showMessageDialog(null,
+                    "Failed to initialize admin dashboard",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            });
+        }
+        LOGGER.info("AdminController constructor completed");
     }
 
+    public JFrame getDashboardFrame() {
+        LOGGER.info("Returning dashboard frame: " + (adminView1 != null));
+        if (adminView1 != null) {
+            adminView1.setVisible(true);
+        }
+        return adminView1;
+    }
+
+    public JFrame getCorrectDashboardFrame() {
+        LOGGER.info("Returning correct dashboard frame: " + (dashboardFrame != null));
+        if (dashboardFrame != null) {
+            dashboardFrame.setVisible(true);
+            configureFrame(dashboardFrame, "Admin Dashboard");
+        }
+        return dashboardFrame;
+    }
+
+    private void verifyDatabaseConnection() {
+        try {
+            Connection conn = DatabaseConnection.getConnection();
+            if (conn != null) {
+                System.out.println("Database connection successful");
+                conn.close();
+            } else {
+                throw new SQLException("Failed to establish database connection");
+            }
+        } catch (SQLException e) {
+            System.err.println("Database connection error: " + e.getMessage());
+            throw new RuntimeException("Database connection failed", e);
+        }
+    }
+    //this methods loads and updates dashboard datas like user counts and active user- which is the main feature of admin dasboard
     private void loadDashboardData() {
         try {
             int totalUsers = userDao.getTotalUserCount();
-            int activeUsers = scoreDao.getActiveUserCount();
+            int activeUsers = (scoreDao != null && listenerRegistered) ? scoreDao.getActiveUserCount() : 0; // Modified to check listenerRegistered
             String newestUser = userDao.getNewestUser();
-            dashboardFrame.updateDashboardStats(totalUsers, activeUsers, newestUser);
+            
+            List<ScoreDao.ActiveUserScore> activeUsersList = (scoreDao != null && listenerRegistered) ? scoreDao.getRecentActiveUsers() : new ArrayList<>(); // Modified to check listenerRegistered
+            
+            SwingUtilities.invokeLater(() -> {
+                if (dashboardFrame != null) {
+                    dashboardFrame.updateDashboardStats(totalUsers, activeUsers, newestUser);
+                    dashboardFrame.updateActiveUsersList(activeUsersList);
+                    LOGGER.info("Dashboard data updated successfully");
+                } else {
+                    LOGGER.severe("Cannot update dashboard data: dashboardFrame is null");
+                }
+            });
+            
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error loading dashboard data", e);
-            dashboardFrame.updateDashboardStats(-1, -1, "Error");
+            SwingUtilities.invokeLater(() -> {
+                if (dashboardFrame != null) {
+                    dashboardFrame.updateDashboardStats(-1, -1, "Error");
+                } else {
+                    LOGGER.severe("Cannot update dashboard stats: dashboardFrame is null");
+                }
+            });
         }
     }
+    // this diplays all
 
     private void loadAndDisplayUsers() {
         try {
             List<UserData> userList = userDao.getAllUsers();
-            userFrame.displayUsers(userList);
+            if (userFrame != null) {
+                userFrame.displayUsers(userList);
+                LOGGER.info("User list loaded successfully");
+            } else {
+                LOGGER.severe("userFrame is null, cannot display users");
+            }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to load users", e);
+            if (userFrame != null) {
+                JOptionPane.showMessageDialog(userFrame, 
+                    "Error loading users: " + e.getMessage(), 
+                    "Error", 
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+// retrive user datas by username
+    public UserData getUserDetails(String username) {
+        try {
+            return userDao.getUserByUsername(username);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error getting user details for: " + username, e);
+            return null;
+        }
+    }
+
+    public void updateUser(String originalUsername, String newUsername, String newEmail, String newPassword) {
+        try {
+            UserData originalUser = userDao.getUserByUsername(originalUsername);
+            if (originalUser == null) {
+                if (userFrame != null) {
+                    JOptionPane.showMessageDialog(userFrame, 
+                        "Original user not found. Cannot update.", 
+                        "Error", 
+                        JOptionPane.ERROR_MESSAGE);
+                }
+                return;
+            }
+            // create update user object
+
+            UserData updatedUser = new UserData(
+                originalUser.getId(), 
+                newUsername, 
+                newEmail, 
+                newPassword,
+                originalUser.getRole()
+            );
+            // this update user in db
+            
+            boolean success = userDao.updateUser(updatedUser);
+            if (success) {
+                if (userFrame != null) {
+                    JOptionPane.showMessageDialog(userFrame, "User updated successfully!");
+                    loadAndDisplayUsers();
+                    loadDashboardData();
+                }
+            } else {
+                if (userFrame != null) {
+                    JOptionPane.showMessageDialog(userFrame, 
+                        "Failed to update user: " + userDao.getErrorMessage(), 
+                        "Error", 
+                        JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error updating user", e);
+            if (userFrame != null) {
+                JOptionPane.showMessageDialog(userFrame, 
+                    "Error updating user: " + e.getMessage(), 
+                    "Error", 
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+    // since admin has access to add new user , admin adding new user to db
+
+    public void addUser(String name, String username, String email, String password) {
+        try {
+            UserData newUser = new UserData(username, email, password);
+            newUser.setRole("player");
+            boolean success = userDao.register(newUser);
+            if (success) {
+                if (userFrame != null) {
+                    JOptionPane.showMessageDialog(userFrame, "User added successfully!");
+                    loadAndDisplayUsers();
+                    loadDashboardData();
+                }
+            } else {
+                if (userFrame != null) {
+                    JOptionPane.showMessageDialog(userFrame, 
+                        "Error adding user: " + userDao.getErrorMessage(), 
+                        "Error", 
+                        JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error adding user", e);
+            if (userFrame != null) {
+                JOptionPane.showMessageDialog(userFrame, 
+                    "Error adding user: " + e.getMessage(), 
+                    "Error", 
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+    // deletes
+
+    public void deleteUser(String username) {
+        try {
+            if (username == null || username.isEmpty()) {
+                if (userFrame != null) {
+                    JOptionPane.showMessageDialog(userFrame, 
+                        "Please select a user to delete.", 
+                        "Warning", 
+                        JOptionPane.WARNING_MESSAGE);
+                }
+                return;
+            }
+
+            if (username.equals("admin")) {
+                if (userFrame != null) {
+                    JOptionPane.showMessageDialog(userFrame,
+                        "Cannot delete admin account.",
+                        "Warning",
+                        JOptionPane.WARNING_MESSAGE);
+                }
+                return;
+            }
+
+            if (userFrame != null) {
+                int response = JOptionPane.showConfirmDialog(userFrame,
+                    "Are you sure you want to delete user '" + username + "'?\nThis action cannot be undone.",
+                    "Confirm Deletion",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE);
+                
+                if (response == JOptionPane.YES_OPTION) {
+                    boolean success = userDao.deleteUserByUsername(username);
+                    if (success) {
+                        JOptionPane.showMessageDialog(userFrame, "User deleted successfully!");
+                        loadAndDisplayUsers();
+                        loadDashboardData();
+                    } else {
+                        JOptionPane.showMessageDialog(userFrame, 
+                            "Error deleting user: " + userDao.getErrorMessage(), 
+                            "Error", 
+                            JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error deleting user: " + username, e);
+            if (userFrame != null) {
+                JOptionPane.showMessageDialog(userFrame,
+                    "Error deleting user: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
     private void configureFrame(JFrame frame, String title) {
-        frame.setTitle(title);
-        frame.setLocationRelativeTo(null);
-        frame.setMinimumSize(new java.awt.Dimension(1200, 600));
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        try {
+            if (frame == null) {
+                throw new IllegalArgumentException("Frame is null for title: " + title);
+            }
+            frame.setTitle(title);
+            frame.setLocationRelativeTo(null);
+            frame.setMinimumSize(new Dimension(1200, 600));
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            System.out.println("Frame configured successfully: " + title);
+        } catch (Exception e) {
+            System.err.println("Error configuring frame '" + title + "': " + e.getMessage());
+            throw e;
+        }
     }
+    // navigation buttons
 
     private void setupNavigation() {
-        dashboardFrame.jButton1.addActionListener(e -> navigateToDashboard(e));
-        userFrame.jButton1.addActionListener(e -> navigateToDashboard(e));
-        notificationFrame.jButton1.addActionListener(e -> navigateToDashboard(e));
+        if (dashboardFrame != null) {
+            dashboardFrame.jButton1.addActionListener(e -> navigateToDashboard(e));
+            dashboardFrame.jButton2.addActionListener(e -> navigateToUser(e));
+            dashboardFrame.jButton3.addActionListener(e -> navigateToNotification(e));
+            dashboardFrame.addRefreshButtonListener(e -> refreshDashboard());
+            LOGGER.info("Navigation set up for dashboardFrame");
+        } else {
+            LOGGER.severe("dashboardFrame is null, cannot set up navigation for dashboard");
+        }
 
-        dashboardFrame.jButton2.addActionListener(e -> navigateToUser(e));
-        userFrame.jButton2.addActionListener(e -> navigateToUser(e));
-        notificationFrame.jButton2.addActionListener(e -> navigateToUser(e));
+        if (userFrame != null) {
+            UIManager.put("OptionPane.okButtonText", "OK");
+            userFrame.jButton1.addActionListener(e -> navigateToDashboard(e));
+            userFrame.jButton2.addActionListener(e -> navigateToUser(e));
+            userFrame.jButton3.addActionListener(e -> navigateToNotification(e));
+            LOGGER.info("Navigation set up for userFrame");
+        } else {
+            LOGGER.severe("userFrame is null, cannot set up navigation for user frame");
+        }
 
-        dashboardFrame.jButton3.addActionListener(e -> navigateToNotification(e));
-        userFrame.jButton3.addActionListener(e -> navigateToNotification(e));
-        notificationFrame.jButton3.addActionListener(e -> navigateToNotification(e));
+        if (notificationFrame != null) {
+            notificationFrame.jButton1.addActionListener(e -> navigateToDashboard(e));
+            notificationFrame.jButton2.addActionListener(e -> navigateToUser(e));
+            notificationFrame.jButton3.addActionListener(e -> navigateToNotification(e));
+            LOGGER.info("Navigation set up for notificationFrame");
+        } else {
+            LOGGER.severe("notificationFrame is null, cannot set up navigation for notification frame");
+        }
+    }
+    // navigating events between dashboard, user and notification
+
+    private void navigateToDashboard(ActionEvent e) { 
+        showDashboard(); 
+    }
+    
+    private void navigateToUser(ActionEvent e) { 
+        loadAndDisplayUsers(); 
+        showUser(); 
+    }
+    
+    private void navigateToNotification(ActionEvent e) { 
+        showNotification(); 
+    }
+    
+    private void showDashboard() { 
+        LOGGER.info("Showing dashboard");
+        hideAllFrames(); 
+        loadDashboardData();
+        if (dashboardFrame != null) {
+            dashboardFrame.setVisible(true);
+        } else {
+            LOGGER.severe("dashboardFrame is null, cannot show dashboard");
+        }
+    }
+    
+    private void showUser() { 
+        hideAllFrames(); 
+        if (userFrame != null) {
+            userFrame.setVisible(true);
+        } else {
+            LOGGER.severe("userFrame is null, cannot show user frame");
+        }
+    }
+    
+    private void showNotification() { 
+        hideAllFrames(); 
+        if (notificationFrame != null) {
+            notificationFrame.setVisible(true);
+        } else {
+            LOGGER.severe("notificationFrame is null, cannot show notification frame");
+        }
+    }
+    
+    private void hideAllFrames() {
+        if (dashboardFrame != null) {
+            dashboardFrame.setVisible(false);
+        }
+        if (userFrame != null) {
+            userFrame.setVisible(false);
+        }
+        if (notificationFrame != null) {
+            notificationFrame.setVisible(false);
+        }
     }
 
-    private void navigateToDashboard(ActionEvent e) { showDashboard(); }
-    private void navigateToUser(ActionEvent e) { loadAndDisplayUsers(); showUser(); }
-    private void navigateToNotification(ActionEvent e) { showNotification(); }
-    private void showDashboard() { hideAllFrames(); dashboardFrame.setVisible(true); }
-    private void showUser() { hideAllFrames(); userFrame.setVisible(true); }
-    private void showNotification() { hideAllFrames(); notificationFrame.setVisible(true); }
-    private void hideAllFrames() {
-        dashboardFrame.setVisible(false);
-        userFrame.setVisible(false);
-        notificationFrame.setVisible(false);
+    public void refreshDashboard() {
+        LOGGER.info("Refreshing dashboard");
+        loadDashboardData();
+    }
+
+    @Override
+    public void onScoreUpdated() {
+        LOGGER.info("Score updated, triggering dashboard refresh");
+        refreshDashboard();
     }
 
     public static void main(String[] args) {
-        java.awt.EventQueue.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> {
             try {
                 new AdminController();
             } catch (Exception e) {
