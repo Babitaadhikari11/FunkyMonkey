@@ -5,17 +5,18 @@ import demogame.model.UserData;
 import demogame.view.LoginView;
 import demogame.view.MenuView;
 import demogame.view.SignUpView;
+import demogame.view.ForgotPasswordView;
 import demogame.view.LoadingView;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-// manage login
+
 public class LoginController {
     private static final Logger LOGGER = Logger.getLogger(LoginController.class.getName());
     private UserDao userDAO;
     private LoginView view;
-    private int loggedInUserId = -1; //stores id and username of currenlty loggedin user
+    private int loggedInUserId = -1;
     private String loggedInUsername;
 
     public LoginController(LoginView view) {
@@ -23,17 +24,41 @@ public class LoginController {
         this.userDAO = new UserDao();
         initializeListeners();
     }
-// handle navigation between login and singup
+
     private void initializeListeners() {
         view.getLoginButton().addActionListener(e -> handleLogin());
         view.getCreateAccountLink().addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
+                System.out.println("Create Account clicked!"); // Debug
                 showSignUpView();
+            }
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                view.getCreateAccountLink().setText("<html><u>Create Account</u></html>");
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                view.getCreateAccountLink().setText("<html><u>Create Account</u></html>"); // Match LoginView's underlined style
+            }
+        });
+        view.getForgotPasswordLink().addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                System.out.println("Forgot Password clicked!"); // Debug
+                showForgotPasswordView();
+            }
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                view.getForgotPasswordLink().setText("<html><u>Forgot Password?</u></html>");
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                view.getForgotPasswordLink().setText("<html><u>Forgot Password?</u></html>"); // Match LoginView's underlined style
             }
         });
     }
-// this retrieve username password and authenticates them
+
     private void handleLogin() {
         String username = view.getUsername();
         String password = view.getPassword();
@@ -44,7 +69,7 @@ public class LoginController {
     }
 
     private boolean validateInput(String username, String password) {
-        if (username.isEmpty() || password.isEmpty()) {
+        if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
             view.showError("Username and password cannot be empty.");
             return false;
         }
@@ -80,7 +105,7 @@ public class LoginController {
             view.dispose();
         });
     }
-// username sangai display huncha
+
     private void handleSuccessfulLogin(UserData user) {
         this.loggedInUserId = user.getId();
         this.loggedInUsername = user.getUsername();
@@ -98,6 +123,15 @@ public class LoginController {
             SignUpView signUpPanel = new SignUpView();
             new SignupController(signUpPanel);
             signUpPanel.setVisible(true);
+        });
+    }
+
+    private void showForgotPasswordView() {
+        SwingUtilities.invokeLater(() -> {
+            view.setVisible(false);
+            ForgotPasswordView forgotPasswordView = new ForgotPasswordView();
+            new ForgotPasswordController(forgotPasswordView);
+            forgotPasswordView.setVisible(true);
         });
     }
 
@@ -155,5 +189,10 @@ public class LoginController {
         SwingUtilities.invokeLater(() -> {
             view.showError(message + "\nError: " + e.getMessage());
         });
+    }
+
+    // Added getter for UserDao
+    public UserDao getUserDao() {
+        return userDAO;
     }
 }
