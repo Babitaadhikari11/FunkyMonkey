@@ -1,18 +1,21 @@
 package demogame.model;
 
 import java.awt.Rectangle;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class Monkey {
+    private static final Logger LOGGER = Logger.getLogger(Monkey.class.getName());
     // Physics constants
     private static final float JUMP_FORCE = -18.0f;
     private static final float GRAVITY = 0.6f;
-    // private static final float MAX_FALL_SPEED = 12.0f;
     private static final float MOVE_SPEED = 0.5f;
     private static final float AIR_CONTROL = 0.7f;
-    private static final float JUMP_MOVE_SPEED = 0.8f; // Faster forward movement while jumping
+    private static final float JUMP_MOVE_SPEED = 0.8f;
     private static final float MAX_FALL_SPEED = 8.0f;
-    private static final float FORWARD_JUMP_FORCE = -22.0f; // Extra boost when jumping forward
-    private static final float HORIZONTAL_DAMPING = 0.99f; // Reduced horizontal slowdown
+    private static final float FORWARD_JUMP_FORCE = -22.0f;
+    private static final float HORIZONTAL_DAMPING = 0.99f;
+
     // Position and velocity
     private float x;
     private float y;
@@ -42,6 +45,11 @@ public class Monkey {
         this.facingRight = true;
         this.currentFrame = 1;
         this.bounds = new Rectangle(startX, startY, 120, 120);
+        if (bounds.width <= 0 || bounds.height <= 0) {
+            LOGGER.severe("Invalid Monkey dimensions: width=" + bounds.width + ", height=" + bounds.height);
+            throw new IllegalArgumentException("Monkey dimensions must be positive");
+        }
+        LOGGER.info("Monkey initialized at (" + startX + ", " + startY + ") with width=" + bounds.width + ", height=" + bounds.height);
     }
 
     public void update() {
@@ -51,9 +59,8 @@ public class Monkey {
             if (velocityY > MAX_FALL_SPEED) {
                 velocityY = MAX_FALL_SPEED;
             }
-             // Maintain forward momentum during jump
             if (isJumping && velocityX > 0) {
-                velocityX *= 0.99f; // Very slight decay of forward momentum
+                velocityX *= HORIZONTAL_DAMPING;
             }
         }
 
@@ -62,7 +69,7 @@ public class Monkey {
         y += velocityY;
 
         // Update collision bounds
-        // bounds.setLocation(Math.round(x), Math.round(y));
+        bounds.setLocation(Math.round(x), Math.round(y));
 
         // Update animation
         updateAnimation();
@@ -72,14 +79,12 @@ public class Monkey {
         frameDelay++;
         if (frameDelay >= FRAME_DELAY_LIMIT) {
             frameDelay = 0;
-            
-            // Update frame based on state
             if (!isOnGround) {
-                currentFrame = velocityY < 0 ? 8 : 11; // Jump or fall animation
+                currentFrame = velocityY < 0 ? 8 : 11;
             } else if (Math.abs(velocityX) > 0.1f) {
-                currentFrame = ((currentFrame - 4 + 1) % 4) + 4; // Run animation
+                currentFrame = ((currentFrame - 4 + 1) % 4) + 4;
             } else {
-                currentFrame = ((currentFrame - 1 + 1) % 3) + 1; // Idle animation
+                currentFrame = ((currentFrame - 1 + 1) % 3) + 1;
             }
         }
     }
@@ -89,10 +94,10 @@ public class Monkey {
             velocityY = JUMP_FORCE;
             isJumping = true;
             isOnGround = false;
-            // Add forward momentum if moving
             if (velocityX > 0) {
-                velocityX = JUMP_MOVE_SPEED; // Faster forward movement during jump
+                velocityX = JUMP_MOVE_SPEED;
             }
+            LOGGER.info("Monkey jumped at y=" + y);
         }
     }
 
@@ -111,23 +116,48 @@ public class Monkey {
     public void jumpForward() {
         if (isOnGround) {
             velocityY = FORWARD_JUMP_FORCE;
-            // velocityX = FORWARD_JUMP_FORCE;
             isJumping = true;
             isOnGround = false;
             facingRight = true;
+            LOGGER.info("Monkey jumped forward at y=" + y);
         }
     }
 
     // Getters
-    public int getX() { return Math.round(x); }
-    public int getY() { return Math.round(y); }
-    public float getVelocityX() { return velocityX; }
-    public float getVelocityY() { return velocityY; }
-    public boolean isJumping() { return isJumping; }
-    public boolean isOnGround() { return isOnGround; }
-    public boolean isFacingRight() { return facingRight; }
-    public Rectangle getBounds() { return bounds; }
-    public int getCurrentFrameNumber() { return currentFrame; }
+    public int getX() { 
+
+        return Math.round(x); 
+    }
+    public int getY() { 
+        return Math.round(y); 
+    }
+    public float getVelocityX() { 
+        return velocityX;
+     }
+    public float getVelocityY() { 
+        return velocityY; 
+    }
+    public boolean isJumping() { 
+        return isJumping; 
+    }
+    public boolean isOnGround() {
+         return isOnGround; 
+        }
+    public boolean isFacingRight() { 
+        return facingRight; 
+    }
+    public Rectangle getBounds() {
+         return bounds; 
+        }
+    public int getCurrentFrameNumber() { 
+        return currentFrame;
+     }
+    public int getWidth() { 
+        return bounds.width; 
+    }
+    public int getHeight() { 
+        return bounds.height;
+     }
 
     // Setters
     public void setX(int x) { 

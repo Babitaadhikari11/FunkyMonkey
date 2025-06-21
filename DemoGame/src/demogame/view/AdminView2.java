@@ -1,7 +1,10 @@
+
 package demogame.view;
 
 import demogame.controller.AdminController;
 import demogame.model.UserData;
+
+import java.awt.Font;
 import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
@@ -22,8 +25,9 @@ public class AdminView2 extends javax.swing.JFrame {
     public AdminView2(AdminController controller) {
         this.adminController = controller; // Store the controller
         initComponents();
-        setMinimumSize(new java.awt.Dimension(1200, 600)); // Adjusted size
-        this.setLocationRelativeTo(null); // Center the window
+        setMinimumSize(new java.awt.Dimension(1200, 600)); // Standardized
+        setSize(1200, 600); // Standardized
+        setLocationRelativeTo(null); // Center the window
     }
 
     /**
@@ -39,7 +43,7 @@ public class AdminView2 extends javax.swing.JFrame {
     }
     
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    // <editor-fold desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
@@ -80,6 +84,7 @@ public class AdminView2 extends javax.swing.JFrame {
         jPanel4.setBackground(new java.awt.Color(242, 244, 230));
         jPanel4.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
+        jLabel2.setFont(new java.awt.Font("Arial", Font.BOLD, 14)); // Standardized font
         jLabel2.setText("Game Dashboard");
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
@@ -99,12 +104,15 @@ public class AdminView2 extends javax.swing.JFrame {
                 .addContainerGap(20, Short.MAX_VALUE))
         );
 
+        jButton1.setFont(new java.awt.Font("Arial", Font.BOLD, 14)); // Standardized font
         jButton1.setText("Dashboard");
         jButton1.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
+        jButton2.setFont(new java.awt.Font("Arial", Font.BOLD, 14)); // Standardized font
         jButton2.setText("User");
         jButton2.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
+        jButton3.setFont(new java.awt.Font("Arial", Font.BOLD, 14)); // Standardized font
         jButton3.setText("Notification");
         jButton3.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
@@ -137,7 +145,7 @@ public class AdminView2 extends javax.swing.JFrame {
         jPanel5.setBackground(new java.awt.Color(207, 222, 212));
         jPanel5.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        jLabel3.setFont(new java.awt.Font("Geeza Pro", 0, 24)); // NOI18N
+        jLabel3.setFont(new java.awt.Font("Geeza Pro", Font.PLAIN, 24)); // Standardized font
         jLabel3.setText("Welcome to Admin Panel");
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
@@ -157,15 +165,19 @@ public class AdminView2 extends javax.swing.JFrame {
                 .addContainerGap(14, Short.MAX_VALUE))
         );
 
+        jLabel1.setFont(new java.awt.Font("Arial", Font.BOLD, 14)); // Standardized font
         jLabel1.setText("Game User");
 
+        jButton4.setFont(new java.awt.Font("Arial", Font.BOLD, 14)); // Standardized font
         jButton4.setText("Delete");
+        jButton4.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jButton4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 deleteButtonActionPerformed(evt);
             }
         });
 
+        jList1.setFont(new java.awt.Font("Arial", Font.PLAIN, 14)); // Standardized font
         jList1.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
@@ -206,29 +218,43 @@ public class AdminView2 extends javax.swing.JFrame {
                 .addGap(20, 20, 20))
         );
 
+        jLabel4.setFont(new java.awt.Font("Arial", Font.BOLD, 14)); // Standardized font
         jLabel4.setText("New User");
 
+        jLabel5.setFont(new java.awt.Font("Arial", Font.BOLD, 14)); // Standardized font
         jLabel5.setText("Name");
 
+        jLabel6.setFont(new java.awt.Font("Arial", Font.BOLD, 14)); // Standardized font
         jLabel6.setText("User name");
 
+        jLabel7.setFont(new java.awt.Font("Arial", Font.BOLD, 14)); // Standardized font
         jLabel7.setText("Email");
 
+        jLabel8.setFont(new java.awt.Font("Arial", Font.BOLD, 14)); // Standardized font
         jLabel8.setText("Password");
 
+        jButton5.setFont(new java.awt.Font("Arial", Font.BOLD, 14)); // Standardized font
         jButton5.setText("Add");
+        jButton5.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jButton5.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 addButtonActionPerformed(evt);
             }
         });
 
+        jButton6.setFont(new java.awt.Font("Arial", Font.BOLD, 14)); // Standardized font
         jButton6.setText("Update");
+        jButton6.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jButton6.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 updateButtonActionPerformed(evt);
             }
         });
+
+        jTextField1.setFont(new java.awt.Font("Arial", Font.PLAIN, 14)); // Standardized font
+        jTextField2.setFont(new java.awt.Font("Arial", Font.PLAIN, 14)); // Standardized font
+        jTextField3.setFont(new java.awt.Font("Arial", Font.PLAIN, 14)); // Standardized font
+        jPasswordField1.setFont(new java.awt.Font("Arial", Font.PLAIN, 14)); // Standardized font
 
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
@@ -387,7 +413,6 @@ public class AdminView2 extends javax.swing.JFrame {
             }
         }
     }
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JButton jButton1;

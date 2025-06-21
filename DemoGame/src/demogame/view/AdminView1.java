@@ -1,363 +1,255 @@
 package demogame.view;
 
+import demogame.controller.AdminController;
+import demogame.dao.ScoreDao;
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-/**
- *
- * @author niranjanrana
- */
-public class AdminView1 extends javax.swing.JFrame {
+public class AdminView1 extends JFrame {
+    private static final Logger LOGGER = Logger.getLogger(AdminView1.class.getName());
 
-    // --- 1. DECLARE NEW JLABELS FOR THE STATS ---
-    // These will hold the numbers and data from the database.
-    private JLabel totalUsersLabel;
-    private JLabel activeUsersLabel;
-    private JLabel newUserLabel;
+    private AdminController adminController;
+    private JLabel totalUsersLabel, activeUsersLabel, newestUserLabel;
+    private JTable activeUsersTable;
+    private DefaultTableModel tableModel;
+    private JScrollPane tableScrollPane;
+    public JButton jButton1, jButton2, jButton3; // Made public for navigation
+    private JButton refreshButton;
 
-    /**
-     * Creates new form AdminView1
-     */
     public AdminView1() {
-        initComponents();
-        setupCustomComponents(); // Call the new method to set up our labels
+        setMinimumSize(new java.awt.Dimension(1200, 600)); // Standardized
+        setSize(1200, 600); // Standardized
+        setLocationRelativeTo(null); // Center the window
+        initializeUI();
     }
 
-    /**
-     * This private method creates our new data labels, styles them,
-     * and adds them to the correct panels from your design.
-     */
-  
+    private void initializeUI() {
+        setTitle("Admin Dashboard");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(203, 235, 220)); // Consistent background
+        mainPanel.setBorder(BorderFactory.createEtchedBorder());
 
-private void setupCustomComponents() {
-    // Define a nice, big font for our data labels
-    Font dataFont = new Font("Geeza Pro", Font.BOLD, 48);
-    // Define a standard font for the titles
-    Font titleFont = new Font("Lucida Grande", Font.PLAIN, 14);
+        // Left Navigation Panel
+        JPanel navPanel = new JPanel();
+        navPanel.setBackground(new Color(197, 225, 195));
+        navPanel.setBorder(BorderFactory.createEtchedBorder());
+        navPanel.setLayout(new BorderLayout());
+        navPanel.setPreferredSize(new Dimension(150, 600)); // Match the height of the frame
 
-    // --- Panel 1: Total Users (jPanel2) ---
-    jPanel2.removeAll(); // Clear the panel of any old components first
-    jPanel2.setLayout(new BorderLayout(0, 10)); // Use BorderLayout with 10px vertical gap
-    jLabel1.setFont(titleFont); // Style the existing title label
-    totalUsersLabel = new JLabel("0", SwingConstants.CENTER);
-    totalUsersLabel.setFont(dataFont);
-    jPanel2.add(jLabel1, BorderLayout.NORTH); // Add the TITLE to the TOP
-    jPanel2.add(totalUsersLabel, BorderLayout.CENTER); // Add the DATA to the CENTER
-    jPanel2.setPreferredSize(new java.awt.Dimension(275, 200)); // <-- ADD THIS LINE
+        JPanel navHeader = new JPanel();
+        navHeader.setBackground(new Color(242, 244, 230));
+        navHeader.setBorder(BorderFactory.createEtchedBorder());
+        JLabel navLabel = new JLabel("Game Dashboard");
+        navLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        navHeader.add(navLabel);
 
-    // --- Panel 2: Active Users (jPanel7) ---
-    jPanel7.removeAll();
-    jPanel7.setLayout(new BorderLayout(0, 10));
-    jLabel5.setFont(titleFont); // Style the existing title label
-    activeUsersLabel = new JLabel("0", SwingConstants.CENTER);
-    activeUsersLabel.setFont(dataFont);
-    jPanel7.add(jLabel5, BorderLayout.NORTH); // Add TITLE to the TOP
-    jPanel7.add(activeUsersLabel, BorderLayout.CENTER); // Add DATA to the CENTER
-    jPanel7.setPreferredSize(new java.awt.Dimension(275, 200)); // <-- ADD THIS LINE
+        // Vertical Button Panel
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(new Color(197, 225, 195));
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS)); // Vertical layout
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
 
-    // --- Panel 3: New User (jPanel6) ---
-    jPanel6.removeAll();
-    jPanel6.setLayout(new BorderLayout(0, 10));
-    jLabel4.setFont(titleFont); // Style the existing title label
-    newUserLabel = new JLabel("N/A", SwingConstants.CENTER);
-    newUserLabel.setFont(new Font("Geeza Pro", Font.BOLD, 36)); // Slightly smaller font for text
-    jPanel6.add(jLabel4, BorderLayout.NORTH); // Add TITLE to the TOP
-    jPanel6.add(newUserLabel, BorderLayout.CENTER); // Add DATA to the CENTER
-    jPanel6.setPreferredSize(new java.awt.Dimension(275, 200)); // <-- ADD THIS LINE
-    
-    // Tell the main panel to update its layout after our changes
-    jPanel1.revalidate();
-    jPanel1.repaint();
-}
-    /**
-     * This is the public method the AdminController will call.
-     * It takes the data and updates the text of our new labels.
-     */
-    public void updateDashboardStats(int total, int active, String newest) {
-        // --- 3. IMPLEMENT THE UPDATE METHOD ---
+        jButton1 = new JButton("Dashboard");
+        jButton2 = new JButton("Users");
+        jButton3 = new JButton("Notifications");
+        int buttonWidth = 120; // Consistent width
+        int buttonHeight = 38; // Consistent height
+        Dimension buttonSize = new Dimension(buttonWidth, buttonHeight);
+        jButton1.setPreferredSize(buttonSize);
+        jButton2.setPreferredSize(buttonSize);
+        jButton3.setPreferredSize(buttonSize);
+        jButton1.setFont(new Font("Arial", Font.BOLD, 14));
+        jButton2.setFont(new Font("Arial", Font.BOLD, 14));
+        jButton3.setFont(new Font("Arial", Font.BOLD, 14));
+        jButton1.setBorder(BorderFactory.createSoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jButton2.setBorder(BorderFactory.createSoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jButton3.setBorder(BorderFactory.createSoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+
+        // Add buttons with spacing to match AdminView3 layout
+        buttonPanel.add(jButton1);
+        buttonPanel.add(Box.createVerticalStrut(69)); // Spacing to match AdminView3
+        buttonPanel.add(jButton2);
+        buttonPanel.add(Box.createVerticalStrut(56)); // Spacing to match AdminView3
+        buttonPanel.add(jButton3);
+
+        navPanel.add(navHeader, BorderLayout.NORTH);
+        navPanel.add(buttonPanel, BorderLayout.CENTER);
+
+        // Top Header Panel
+        JPanel headerPanel = new JPanel();
+        headerPanel.setBackground(new Color(207, 222, 212));
+        headerPanel.setBorder(BorderFactory.createEtchedBorder());
+        JLabel headerLabel = new JLabel("Welcome to Admin Panel");
+        headerLabel.setFont(new Font("Geeza Pro", Font.PLAIN, 24));
+        headerPanel.add(headerLabel);
+
+        // Main Content Panel
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setBackground(new Color(203, 235, 220));
+
+        // Stats Panel
+        JPanel statsPanel = new JPanel(new BorderLayout());
+        statsPanel.setBackground(new Color(207, 222, 212));
+        statsPanel.setBorder(BorderFactory.createTitledBorder("Dashboard Stats"));
+
+        // Make stats labels more noticeable
+        totalUsersLabel = new JLabel("Total Users: -");
+        activeUsersLabel = new JLabel("Active Users: -");
+        newestUserLabel = new JLabel("Newest User: -");
+        totalUsersLabel.setFont(new Font("Arial", Font.BOLD, 16)); // Larger, bold font
+        activeUsersLabel.setFont(new Font("Arial", Font.BOLD, 16)); // Larger, bold font
+        newestUserLabel.setFont(new Font("Arial", Font.BOLD, 16)); // Larger, bold font
+        totalUsersLabel.setForeground(Color.BLUE); // Distinct color
+        activeUsersLabel.setForeground(Color.GREEN); // Distinct color
+        newestUserLabel.setForeground(Color.RED); // Distinct color
+
+        JPanel labelsPanel = new JPanel();
+        labelsPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 20, 0)); // Horizontal layout with spacing
+        labelsPanel.add(totalUsersLabel);
+        labelsPanel.add(activeUsersLabel);
+        labelsPanel.add(newestUserLabel);
+
+        statsPanel.add(labelsPanel, BorderLayout.CENTER);
+
+        // Active Users Table
+        setupActiveUsersTable();
+
+        // Refresh Button
+        refreshButton = new JButton("Refresh");
+        refreshButton.setFont(new Font("Arial", Font.BOLD, 14));
+        refreshButton.setBorder(BorderFactory.createSoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+
+        contentPanel.add(statsPanel, BorderLayout.NORTH);
+        contentPanel.add(tableScrollPane, BorderLayout.CENTER);
+        contentPanel.add(refreshButton, BorderLayout.SOUTH);
+
+        mainPanel.add(navPanel, BorderLayout.WEST);
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
+
+        add(mainPanel);
+        LOGGER.info("AdminView1 UI initialized successfully");
+    }
+
+    private void setupActiveUsersTable() {
+        String[] columnNames = {"Username", "High Score", "Games Played", "Days Played", "Last Played"};
         
-        // Check for an error state (-1) passed from the controller
-        if (total == -1) {
-            totalUsersLabel.setText("Error");
-            activeUsersLabel.setText("Error");
-            newUserLabel.setText("Error");
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        activeUsersTable = new JTable(tableModel);
+        tableScrollPane = new JScrollPane(activeUsersTable);
+        activeUsersTable.setFont(new Font("Arial", Font.PLAIN, 14));
+        activeUsersTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+        activeUsersTable.setRowHeight(25);
+        activeUsersTable.getColumnModel().getColumn(0).setPreferredWidth(150);
+        activeUsersTable.getColumnModel().getColumn(1).setPreferredWidth(100);
+        activeUsersTable.getColumnModel().getColumn(2).setPreferredWidth(100);
+        activeUsersTable.getColumnModel().getColumn(3).setPreferredWidth(100);
+        activeUsersTable.getColumnModel().getColumn(4).setPreferredWidth(150);
+        
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        for (int i = 0; i < activeUsersTable.getColumnCount(); i++) {
+            activeUsersTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+        
+        LOGGER.info("Active users table setup completed");
+    }
+
+    public void setAdminController(AdminController controller) {
+        this.adminController = controller;
+        addRefreshButtonListener(e -> {
+            if (adminController != null) {
+                adminController.refreshDashboard();
+            } else {
+                LOGGER.severe("adminController is null in setAdminController");
+            }
+        });
+    }
+
+    public void addRefreshButtonListener(ActionListener listener) {
+        if (refreshButton != null) {
+            refreshButton.addActionListener(listener);
+            LOGGER.info("Refresh button listener added");
         } else {
-            // Otherwise, set the text with the actual data
-            totalUsersLabel.setText(String.valueOf(total));
-            activeUsersLabel.setText(String.valueOf(active));
-            newUserLabel.setText(newest);
+            LOGGER.severe("refreshButton is null in addRefreshButtonListener");
         }
     }
 
-   
-
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-
-        jPanel1 = new javax.swing.JPanel();
-        jPanel3 = new javax.swing.JPanel();
-        jPanel4 = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
-        jPanel5 = new javax.swing.JPanel();
-        jLabel3 = new javax.swing.JLabel();
-        jPanel2 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        jPanel6 = new javax.swing.JPanel();
-        jLabel4 = new javax.swing.JLabel();
-        jPanel7 = new javax.swing.JPanel();
-        jLabel5 = new javax.swing.JLabel();
-
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        jPanel1.setBackground(new java.awt.Color(203, 235, 220));
-        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-        jPanel3.setBackground(new java.awt.Color(197, 225, 195));
-        jPanel3.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-        jPanel4.setBackground(new java.awt.Color(242, 244, 230));
-        jPanel4.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-        jLabel2.setText("Game Dashboard");
-
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(20, 20, 20)
-                .addComponent(jLabel2)
-                .addContainerGap(14, Short.MAX_VALUE))
-        );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(15, 15, 15)
-                .addComponent(jLabel2)
-                .addContainerGap(20, Short.MAX_VALUE))
-        );
-
-        jButton1.setText("Dashboard");
-        jButton1.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-
-        jButton2.setText("User");
-        jButton2.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+    public void updateDashboardStats(int totalUsers, int activeUsers, String newestUser) {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                totalUsersLabel.setText("Total Users: " + (totalUsers >= 0 ? totalUsers : "-"));
+                activeUsersLabel.setText("Active Users: " + (activeUsers >= 0 ? activeUsers : "-"));
+                newestUserLabel.setText("Newest User: " + (newestUser != null ? newestUser : "-"));
+                LOGGER.info("Dashboard stats updated: Total=" + totalUsers + ", Active=" + activeUsers + ", Newest=" + newestUser);
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Error updating dashboard stats", e);
             }
         });
+    }
 
-        jButton3.setText("Notification");
-        jButton3.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(16, 16, 16))
-        );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(51, 51, 51)
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(69, 69, 69)
-                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(56, 56, 56)
-                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 203, Short.MAX_VALUE))
-        );
-
-        jPanel5.setBackground(new java.awt.Color(207, 222, 212));
-        jPanel5.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-        jLabel3.setFont(new java.awt.Font("Geeza Pro", 0, 24)); // NOI18N
-        jLabel3.setText("Welcome to Admin Panel");
-
-        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
-        jPanel5.setLayout(jPanel5Layout);
-        jPanel5Layout.setHorizontalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel5Layout.createSequentialGroup()
-                .addGap(386, 386, 386)
-                .addComponent(jLabel3)
-                .addContainerGap(337, Short.MAX_VALUE))
-        );
-        jPanel5Layout.setVerticalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel5Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel3)
-                .addContainerGap(14, Short.MAX_VALUE))
-        );
-
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Total Users");
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 274, Short.MAX_VALUE)
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(20, 20, 20)
-                .addComponent(jLabel1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel4.setText("New User");
-
-        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
-        jPanel6.setLayout(jPanel6Layout);
-        jPanel6Layout.setHorizontalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 279, Short.MAX_VALUE)
-        );
-        jPanel6Layout.setVerticalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addGap(25, 25, 25)
-                .addComponent(jLabel4)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel5.setText("Active Users");
-
-        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
-        jPanel7.setLayout(jPanel7Layout);
-        jPanel7Layout.setHorizontalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
-        );
-        jPanel7Layout.setVerticalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel7Layout.createSequentialGroup()
-                .addGap(24, 24, 24)
-                .addComponent(jLabel5)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(41, 41, 41)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 41, Short.MAX_VALUE)
-                        .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(46, 46, 46)
-                        .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(39, 39, 39))))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(34, 34, 34)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jPanel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(45, 45, 45))
-        );
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
-
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
+    public void updateActiveUsersList(List<ScoreDao.ActiveUserScore> activeUsers) {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                LOGGER.info("Updating active users list with " + (activeUsers != null ? activeUsers.size() : 0) + " users");
+                if (tableModel == null) {
+                    setupActiveUsersTable();
                 }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(AdminView1.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(AdminView1.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(AdminView1.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(AdminView1.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+                tableModel.setRowCount(0);
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new AdminView1().setVisible(true);
+                if (activeUsers != null) {
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                    for (ScoreDao.ActiveUserScore user : activeUsers) {
+                        Object[] row = {
+                            user.getUsername(),
+                            user.getHighScore(),
+                            user.getGamesPlayed(),
+                            user.getDaysPlayed(),
+                            dateFormat.format(user.getLastPlayed())
+                        };
+                        tableModel.addRow(row);
+                    }
+                }
+
+                activeUsersTable.revalidate();
+                activeUsersTable.repaint();
+                revalidate();
+                repaint();
+                LOGGER.info("Active users table updated with " + tableModel.getRowCount() + " rows");
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Error updating active users table", e);
+                JOptionPane.showMessageDialog(this, "Error updating table: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
     }
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    public javax.swing.JButton jButton1;
-    public javax.swing.JButton jButton2;
-    public javax.swing.JButton jButton3;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
-    private javax.swing.JPanel jPanel5;
-    private javax.swing.JPanel jPanel6;
-    private javax.swing.JPanel jPanel7;
-    // End of variables declaration//GEN-END:variables
 }
