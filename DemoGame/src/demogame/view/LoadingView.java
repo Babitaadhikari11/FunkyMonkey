@@ -1,9 +1,9 @@
 package demogame.view;
 
 import java.awt.*;
-import javax.swing.*;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.*;
 
 public class LoadingView extends JFrame {
     private static final Logger LOGGER = Logger.getLogger(LoadingView.class.getName());
@@ -16,31 +16,32 @@ public class LoadingView extends JFrame {
 
     public LoadingView() {
         try {
-            setTitle("Loading");
-            setSize(1200, 800);
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            setLocationRelativeTo(null);
-            setResizable(false);
+    setTitle("Loading");
+    setSize(1200, 800);
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setLocationRelativeTo(null);
+    setResizable(false);
 
-            // Set background
-            ImageIcon backgroundIcon = new ImageIcon(getClass().getResource("/resources/Loadingbg.jpg"));
-            if (backgroundIcon.getImage() == null) {
-                LOGGER.warning("Failed to load background image: /resources/Loadingbg.jpg");
-                setContentPane(new JPanel()); // Fallback to empty panel
-            } else {
-                setContentPane(new JLabel(backgroundIcon));
-            }
-            getContentPane().setLayout(new GridBagLayout());
+    // Set background
+    ImageIcon backgroundIcon = new ImageIcon(getClass().getResource("/resources/Loadingbg.jpg"));
+    if (backgroundIcon.getImage() == null) {
+        LOGGER.warning("Failed to load background image: /resources/Loadingbg.jpg");
+        setContentPane(new JPanel()); // Fallback to empty panel
+    } else {
+        setContentPane(new JLabel(backgroundIcon));
+    }
+    getContentPane().setLayout(new GridBagLayout());
 
-            initializeComponents();
-            layoutComponents();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error initializing LoadingView", e);
-            JOptionPane.showMessageDialog(null,
-                "Error loading game resources: " + e.getMessage(),
-                "Loading Error",
-                JOptionPane.ERROR_MESSAGE);
-        }
+    initializeComponents();
+    layoutComponents();
+} catch (Exception e) {
+    LOGGER.log(Level.SEVERE, "Error initializing LoadingView", e);
+    // Do not show JOptionPane; proceed with fallback
+    setContentPane(new JPanel()); // Ensure frame has a content pane
+    getContentPane().setLayout(new GridBagLayout());
+    initializeComponents(); // Retry initializing components
+    layoutComponents();
+}
     }
 
     private void initializeComponents() {
