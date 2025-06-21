@@ -1,18 +1,18 @@
 package demogame.view;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.BufferedImage;
-import javax.swing.*;
-import demogame.model.Monkey;
-import demogame.model.Obstacle;
-import demogame.model.TutorialOverlay;
 import demogame.controller.BananaController;
 import demogame.controller.MonkeyController;
 import demogame.controller.ObstacleController;
 import demogame.controller.ScoreController;
-import java.util.logging.Logger;
+import demogame.model.Monkey;
+import demogame.model.Obstacle;
+import demogame.model.TutorialOverlay;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.*;
 
 public class GamePanel extends JPanel implements ActionListener {
     // Constants
@@ -107,7 +107,7 @@ public class GamePanel extends JPanel implements ActionListener {
         });
     }
 
-    // ... (rest of the GamePanel code remains unchanged, included below for completeness)
+    
 
     private void loadResources() {
         try {
@@ -321,13 +321,13 @@ public class GamePanel extends JPanel implements ActionListener {
                                 obstacle.getHeight(), 
                                 null);
                     
-                    if (SHOW_COLLISION_BOXES) {
-                        g2d.setColor(Color.RED);
-                        g2d.drawRect(obstacle.getX() + 10, 
-                                   obstacle.getY() + 10, 
-                                   obstacle.getWidth() - 20, 
-                                   obstacle.getHeight() - 20);
-                    }
+                    // if (SHOW_COLLISION_BOXES) {
+                    //     g2d.setColor(Color.RED);
+                    //     g2d.drawRect(obstacle.getX() + 10, 
+                    //                obstacle.getY() + 10, 
+                    //                obstacle.getWidth() - 20, 
+                    //                obstacle.getHeight() - 20);
+                    // }
                 }
             }
         }
