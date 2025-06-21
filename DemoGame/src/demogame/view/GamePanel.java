@@ -1,18 +1,18 @@
 package demogame.view;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.BufferedImage;
-import javax.swing.*;
-import demogame.model.Monkey;
-import demogame.model.Obstacle;
-import demogame.model.TutorialOverlay;
 import demogame.controller.BananaController;
 import demogame.controller.MonkeyController;
 import demogame.controller.ObstacleController;
 import demogame.controller.ScoreController;
-import java.util.logging.Logger;
+import demogame.model.Monkey;
+import demogame.model.Obstacle;
+import demogame.model.TutorialOverlay;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.*;
 
 public class GamePanel extends JPanel implements ActionListener {
     // Constants
@@ -107,7 +107,7 @@ public class GamePanel extends JPanel implements ActionListener {
         });
     }
 
-    // ... (rest of the GamePanel code remains unchanged, included below for completeness)
+    
 
     private void loadResources() {
         try {
@@ -128,7 +128,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
     private void setupGame() {
         int monkeyStartX = 50;
-        int monkeyStartY = GROUND_LEVEL - MONKEY_HEIGHT - 50;
+        int monkeyStartY = GROUND_LEVEL - MONKEY_HEIGHT ;
         monkey = new Monkey(monkeyStartX, monkeyStartY);
 
         monkeyController = new MonkeyController(monkey);
@@ -235,9 +235,9 @@ public class GamePanel extends JPanel implements ActionListener {
         drawGameObjects(g2d);
         drawUI(g2d);
         
-        if (SHOW_COLLISION_BOXES) {
-            drawDebugInfo(g2d);
-        }
+        // if (SHOW_COLLISION_BOXES) {
+        //     drawDebugInfo(g2d);
+        // }
         
         if (tutorial.isVisible()) {
             drawTutorialOverlay(g2d);
@@ -260,7 +260,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
     private void drawGround(Graphics2D g2d) {
         g2d.setColor(Color.GREEN);
-        g2d.drawLine(0, GROUND_LEVEL, PANEL_WIDTH, GROUND_LEVEL);
+       // g2d.drawLine(0, GROUND_LEVEL, PANEL_WIDTH, GROUND_LEVEL);
     }
 
     private void drawGameObjects(Graphics2D g2d) {
@@ -321,13 +321,13 @@ public class GamePanel extends JPanel implements ActionListener {
                                 obstacle.getHeight(), 
                                 null);
                     
-                    if (SHOW_COLLISION_BOXES) {
-                        g2d.setColor(Color.RED);
-                        g2d.drawRect(obstacle.getX() + 10, 
-                                   obstacle.getY() + 10, 
-                                   obstacle.getWidth() - 20, 
-                                   obstacle.getHeight() - 20);
-                    }
+                    // if (SHOW_COLLISION_BOXES) {
+                    //     g2d.setColor(Color.RED);
+                    //     g2d.drawRect(obstacle.getX() + 10, 
+                    //                obstacle.getY() + 10, 
+                    //                obstacle.getWidth() - 20, 
+                    //                obstacle.getHeight() - 20);
+                    // }
                 }
             }
         }
@@ -356,15 +356,15 @@ public class GamePanel extends JPanel implements ActionListener {
         // Implement game over overlay if needed
     }
 
-    private void drawDebugInfo(Graphics2D g2d) {
-        g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Arial", Font.PLAIN, 12));
-        if (monkey != null) {
-            g2d.drawString("Monkey Position: " + monkey.getX() + ", " + monkey.getY(), 10, 20);
-            g2d.drawString("Frame: " + monkey.getCurrentFrameNumber(), 10, 40);
-            g2d.drawString("Ground Level: " + GROUND_LEVEL, 10, 60);
-        }
-    }
+    // private void drawDebugInfo(Graphics2D g2d) {
+    //     g2d.setColor(Color.WHITE);
+    //     g2d.setFont(new Font("Arial", Font.PLAIN, 12));
+    //     if (monkey != null) {
+    //         g2d.drawString("Monkey Position: " + monkey.getX() + ", " + monkey.getY(), 10, 20);
+    //         g2d.drawString("Frame: " + monkey.getCurrentFrameNumber(), 10, 40);
+    //         g2d.drawString("Ground Level: " + GROUND_LEVEL, 10, 60);
+    //     }
+    // }
 
     private void handleGameOver() {
         isGameOver = true;

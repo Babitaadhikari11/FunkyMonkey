@@ -1,7 +1,7 @@
 package demogame.controller;
 
-import demogame.model.Obstacle;
 import demogame.model.Monkey;
+import demogame.model.Obstacle;
 import demogame.view.GamePanel;
 import java.util.ArrayList;
 import java.util.Random;
@@ -72,7 +72,7 @@ public class ObstacleController {
     private void spawnObstacle() {
         int obstacleX = PANEL_WIDTH + SPAWN_OFFSET;
  
-        int obstacleY = GROUND_LEVEL - 110; // slightly raised
+        int obstacleY = GROUND_LEVEL - 120; // slightly raised
         
 
         Obstacle obstacle = new Obstacle(obstacleX, obstacleY, 70, 90);
