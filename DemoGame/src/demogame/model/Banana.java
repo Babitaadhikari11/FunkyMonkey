@@ -5,11 +5,11 @@ import java.awt.Rectangle;
 public class Banana {
     private int x;
     private int y;
-    private final int WIDTH = 30;
-    private final int HEIGHT = 30;
+    private final int WIDTH = 50;
+    private final int HEIGHT = 50;
     private boolean isCollected;
     private Rectangle bounds;
-    private final int SPEED = 3;
+    private final float SPEED = 3.4f;
 
     public Banana(int x, int y) {
         this.x = x;

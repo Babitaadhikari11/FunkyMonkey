@@ -2,10 +2,11 @@ package demogame.view;
 
 import demogame.controller.GameController;
 import demogame.model.GameOverListener;
-import javax.swing.*;
 import java.awt.*;
-import java.util.logging.Level;
+
 import java.util.logging.Logger;
+import javax.swing.*;
+
 
 // View for the game window, hosting GamePanel and displaying score
 public class GameView extends JFrame implements GameOverListener {
