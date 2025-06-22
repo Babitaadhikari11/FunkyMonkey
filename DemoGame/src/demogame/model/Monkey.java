@@ -16,10 +16,10 @@ public class Monkey {
     private static final float HORIZONTAL_DAMPING = 0.99f;
 
     // Animation constants
-    private static final double FRAME_DURATION = 1.0 / 12.0; // 24 FPS (~41.67ms per frame)
+    private static final double FRAME_DURATION = 2.0 / 30.0; // 24 FPS (~41.67ms per frame)
     private static final int TOTAL_RUN_FRAMES = 24; // Use all 24 frames for running
     private static final int IDLE_FRAME_START = 1; // Frames 1–3 for idle
-    private static final int IDLE_FRAME_COUNT = 3;
+    private static final int IDLE_FRAME_COUNT = 24;
     private static final int JUMP_ASCEND_FRAME = 8; // Frame for ascending jump
     private static final int JUMP_DESCEND_FRAME = 11; // Frame for descending jump
 
