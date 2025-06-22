@@ -23,7 +23,7 @@ public class GamePanel extends JPanel implements ActionListener {
     private static final int MONKEY_HEIGHT = 120;
     private static final int MONKEY_MIN_X = 150;
     private static final int MONKEY_MAX_X = 350;
-    private static final int BG_SPEED = 2;
+    private static final int BG_SPEED = 3;
     private static final int FRAME_RATE = 60;
     private static final int FRAME_DELAY = 1000 / FRAME_RATE;
     private static final boolean SHOW_COLLISION_BOXES = true;
