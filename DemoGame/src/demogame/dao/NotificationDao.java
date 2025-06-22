@@ -28,3 +28,20 @@ private static final Logger LOGGER = Logger.getLogger(NotificationDao.class.getN
             LOGGER.log(Level.SEVERE, "Error creating notifications table", e);
         }
     }
+    // Initialize default notifications if the table is empty
+    private void initializeDefaultNotifications() {
+        List<Notification> notifications = getAllNotifications();
+        if (notifications.isEmpty()) {
+            String[] defaultMessages = {
+                "Tip: Jump early to avoid obstacles!",
+                "Collect bananas for extra points!",
+                "Watch out for obstacles ahead!",
+                "Use forward jump to clear multiple obstacles!"
+            };
+            for (String message : defaultMessages) {
+                if (addNotification(message)) {
+                    LOGGER.info("Added default notification: " + message);
+                } else {
+                    LOGGER.warning("Failed to add default notification: " + message);
+                }
+            }
