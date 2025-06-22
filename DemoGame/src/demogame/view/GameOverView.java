@@ -12,7 +12,7 @@ public class GameOverView extends JFrame {
 
     public GameOverView(int finalScore) {
         setTitle("🐵 Game Over");
-        setSize(400, 300);
+        setSize(500, 300);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
