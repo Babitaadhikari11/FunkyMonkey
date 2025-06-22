@@ -45,3 +45,17 @@ private static final Logger LOGGER = Logger.getLogger(NotificationDao.class.getN
                     LOGGER.warning("Failed to add default notification: " + message);
                 }
             }
+    // Insert a new notification into the database
+    public boolean addNotification(String message) {
+        String sql = "INSERT INTO " + TABLE_NAME + " (message) VALUES (?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, message);
+            int rows = pstmt.executeUpdate();
+            LOGGER.info("Notification added: " + message);
+            return rows > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error adding notification: " + message, e);
+            return false;
+        }
+    }
