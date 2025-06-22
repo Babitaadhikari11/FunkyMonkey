@@ -1,7 +1,6 @@
 package demogame.view;
 import demogame.model.Banana;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import javax.swing.ImageIcon;
 public class BananaView {
        private Image bananaImage;
@@ -42,7 +41,7 @@ public class BananaView {
         // Draw banana icon and count
         if (bananaImage != null) {
             g2d.drawImage(bananaImage, 120, 10, 20, 20, null);
-            g2d.drawString("x " + bananasCollected, 145, 30);
+            g2d.drawString("x " + bananasCollected, 145, 55);
         }
     }
 
