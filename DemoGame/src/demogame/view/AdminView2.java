@@ -25,7 +25,7 @@ public class AdminView2 extends javax.swing.JFrame {
     public AdminView2(AdminController controller) {
         this.adminController = controller; // Store the controller
         initComponents();
-        setMinimumSize(new java.awt.Dimension(1200, 600)); // Standardized
+        setMinimumSize(new java.awt.Dimension(1200, 800)); // Standardized
         setSize(1200, 600); // Standardized
         setLocationRelativeTo(null); // Center the window
     }
