@@ -74,8 +74,8 @@ public class AdminView1 extends JFrame {
         jButton1 = new JButton("Dashboard");
         jButton2 = new JButton("Users");
         jButton3 = new JButton("Notifications");
-        int buttonWidth = 120; // Consistent width
-        int buttonHeight = 38; // Consistent height
+        int buttonWidth = 80; // Consistent width
+        int buttonHeight = 80; // Consistent height
         Dimension buttonSize = new Dimension(buttonWidth, buttonHeight);
         jButton1.setPreferredSize(buttonSize);
         jButton2.setPreferredSize(buttonSize);
