@@ -3,16 +3,14 @@ package demogame.view;
 import demogame.controller.GameController;
 import demogame.controller.LoadingController;
 import demogame.controller.UserUpdateController;
-import demogame.util.BackgroundMusicPlayer;
 import demogame.dao.UserDao;
-import demogame.view.LoadingView;
-import demogame.view.UserUpdateView;
 import demogame.model.UserData;
-import javax.swing.*;
+import demogame.util.BackgroundMusicPlayer;
 import java.awt.*;
 import java.sql.SQLException;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.*;
 
 public class MenuView extends JFrame {
     private static final Logger LOGGER = Logger.getLogger(MenuView.class.getName());
@@ -56,7 +54,7 @@ public class MenuView extends JFrame {
             LOGGER.warning("Failed to load font Comic Sans MS, using default");
             welcomeLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
         }
-        welcomeLabel.setForeground(Color.RED);
+        welcomeLabel.setForeground(Color.yellow);
         welcomeLabel.setBounds(20, 20, 300, 40);
         layeredPane.add(welcomeLabel, Integer.valueOf(1));
 
