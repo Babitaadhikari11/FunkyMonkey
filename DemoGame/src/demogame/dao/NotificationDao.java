@@ -1,3 +1,5 @@
+package demogame.dao;
+
 import demogame.model.Notification;
 import demogame.util.DatabaseConnection;
 
@@ -7,7 +9,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-private static final Logger LOGGER = Logger.getLogger(NotificationDao.class.getName());
+
+// Data Access Object for managing notifications in the database
+public class NotificationDao {
+    private static final Logger LOGGER = Logger.getLogger(NotificationDao.class.getName());
     private static final String TABLE_NAME = "notifications";
 
     // Initialize the notifications table and populate with default notifications
@@ -15,6 +20,11 @@ private static final Logger LOGGER = Logger.getLogger(NotificationDao.class.getN
         createTable();
         initializeDefaultNotifications();
     }
+  
+
+
+
+    
     // Create the notifications table if it doesn't exist
     private void createTable() {
         String sql = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (" +
@@ -28,6 +38,7 @@ private static final Logger LOGGER = Logger.getLogger(NotificationDao.class.getN
             LOGGER.log(Level.SEVERE, "Error creating notifications table", e);
         }
     }
+
     // Initialize default notifications if the table is empty
     private void initializeDefaultNotifications() {
         List<Notification> notifications = getAllNotifications();
@@ -45,6 +56,9 @@ private static final Logger LOGGER = Logger.getLogger(NotificationDao.class.getN
                     LOGGER.warning("Failed to add default notification: " + message);
                 }
             }
+        }
+    }
+
     // Insert a new notification into the database
     public boolean addNotification(String message) {
         String sql = "INSERT INTO " + TABLE_NAME + " (message) VALUES (?)";
@@ -59,6 +73,7 @@ private static final Logger LOGGER = Logger.getLogger(NotificationDao.class.getN
             return false;
         }
     }
+
     // Retrieve all notifications from the database
     public List<Notification> getAllNotifications() {
         List<Notification> notifications = new ArrayList<>();
@@ -75,6 +90,7 @@ private static final Logger LOGGER = Logger.getLogger(NotificationDao.class.getN
         }
         return notifications;
     }
+
     // Retrieve a random notification from the database
     public Notification getRandomNotification() {
         List<Notification> notifications = getAllNotifications();
@@ -87,3 +103,4 @@ private static final Logger LOGGER = Logger.getLogger(NotificationDao.class.getN
         LOGGER.info("Selected random notification: " + randomNotification.getMessage());
         return randomNotification;
     }
+}
