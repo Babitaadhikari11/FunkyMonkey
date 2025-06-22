@@ -92,7 +92,7 @@ public class GameController {
                 }
                 isGameRunning.set(true);
                 SwingUtilities.invokeLater(() -> {
-                    showLoadingScreen();
+                    // showLoadingScreen();
                     initializeGameView();
                     startScoreUpdateTimer();
                 });
@@ -106,26 +106,26 @@ public class GameController {
         }
     }
 
-    private void showLoadingScreen() {
-        JFrame loadingFrame = new JFrame("Loading...🐒");
-        loadingFrame.setSize(300, 100);
-        loadingFrame.setLocationRelativeTo(null);
-        loadingFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+    // private void showLoadingScreen() {
+    //     JFrame loadingFrame = new JFrame("Loading...🐒");
+    //     loadingFrame.setSize(300, 100);
+    //     loadingFrame.setLocationRelativeTo(null);
+    //     loadingFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
-        JLabel loadingLabel = new JLabel("Loading game...", SwingConstants.CENTER);
-        loadingLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
-        loadingFrame.add(loadingLabel);
+    //     JLabel loadingLabel = new JLabel("Loading game...", SwingConstants.CENTER);
+    //     loadingLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
+    //     loadingFrame.add(loadingLabel);
 
-        loadingFrame.setVisible(true);
+    //     loadingFrame.setVisible(true);
 
-        try {
-            Thread.sleep(1500);
-        } catch (InterruptedException e) {
-            LOGGER.log(Level.WARNING, "Loading screen interrupted", e);
-        }
+    //     try {
+    //         Thread.sleep(1500);
+    //     } catch (InterruptedException e) {
+    //         LOGGER.log(Level.WARNING, "Loading screen interrupted", e);
+    //     }
 
-        loadingFrame.dispose();
-    }
+    //     loadingFrame.dispose();
+    // }
 
     private void initializeGameView() {
         try {

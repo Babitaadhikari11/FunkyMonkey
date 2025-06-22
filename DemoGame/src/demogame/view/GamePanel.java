@@ -13,11 +13,11 @@ import javax.sound.sampled.Clip;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
+import java.util.Timer;
 
 public class GamePanel extends JPanel implements ActionListener, Obstacle.CollisionListener {
     // Constants
@@ -43,6 +43,10 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
     private boolean showControls = true;
     private float controlsAlpha = 1.0f;
     private boolean tutorialActive = true;
+    private boolean showNotification; // Added missing field
+    private String notificationMessage; // Added missing field
+    private Timer notificationTimer; // Added missing field
+    private Clip notificationSound; // Added missing field
 
     // UI Components
     private JButton quitButton;
@@ -50,7 +54,7 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
     private GameView gameView;
 
     // Game objects
-    private Timer gameLoop;
+    private javax.swing.Timer gameLoop; // Explicitly declare as javax.swing.Timer
     private Monkey monkey;
     private MonkeyController monkeyController;
     private ObstacleController obstacleController;
@@ -59,10 +63,7 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
     private SpriteManager spriteManager;
     private ScoreController scoreController;
 
-    private static final Logger LOGGER = Logger.getLogger(GamePanel.class.getName());
-
-
-    private static final Logger LOGGER = Logger.getLogger(GamePanel.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GamePanel.class.getName()); // Single declaration
 
     // Background images
     private Image jungle1;
@@ -71,16 +72,17 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
     private int bgX1;
     private int bgX2;
 
-    public GamePanel(GameView gameView) {
-        this.gameView = gameView;
-        initializePanel();
-        tutorial = new TutorialOverlay();
-        loadResources();
-        setupGame();
-        startGameLoop();
-        requestFocusInWindow();
-        LOGGER.info("GamePanel initialized, tutorialActive=" + tutorialActive);
-    }
+  public GamePanel(GameView gameView) {
+    this.gameView = gameView;
+    initializePanel();
+    tutorial = new TutorialOverlay();
+    loadResources();
+    setupGame();
+    startGameLoop();
+    startNotificationTimer(); // Start notification timer
+    requestFocusInWindow();
+    LOGGER.info("GamePanel initialized, tutorialActive=" + tutorialActive);
+}
 
     public BananaController getBananaController() {
         return bananaController;
@@ -122,28 +124,34 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
         }
     }
 
-    private void loadResources() {
+ private void loadResources() {
+    try {
+        jungle1 = new ImageIcon(getClass().getResource("/resources/Bg1.jpg")).getImage();
+        jungle2 = new ImageIcon(getClass().getResource("/resources/Bg2.jpg")).getImage();
+        obstacleImage = new ImageIcon(getClass().getResource("/resources/obstacle.png")).getImage();
+
+        bgX1 = 0;
+        bgX2 = jungle1 != null ? jungle1.getWidth(null) : PANEL_WIDTH;
+
+        spriteManager = new SpriteManager();
+
+        // Load notification sound safely
         try {
-            jungle1 = new ImageIcon(getClass().getResource("/resources/Bg1.jpg")).getImage();
-            jungle2 = new ImageIcon(getClass().getResource("/resources/Bg2.jpg")).getImage();
-            obstacleImage = new ImageIcon(getClass().getResource("/resources/obstacle.png")).getImage();
-
-
-            bgX1 = 0;
-            bgX2 = jungle1 != null ? jungle1.getWidth(null) : PANEL_WIDTH;
-
-            spriteManager = new SpriteManager();
-
-
-
-            LOGGER.info("Resources loaded successfully");
+            AudioInputStream audioIn = AudioSystem.getAudioInputStream(getClass().getResource("/resources/notification.wav"));
+            notificationSound = AudioSystem.getClip();
+            notificationSound.open(audioIn);
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error loading resources", e);
+            LOGGER.log(Level.WARNING, "Failed to load notification sound", e);
+            notificationSound = null; // Ensure null to avoid runtime errors
         }
+
+        LOGGER.info("Resources loaded successfully");
+    } catch (Exception e) {
+        LOGGER.log(Level.SEVERE, "Error loading resources", e);
     }
+}
 
     private void setupGame() {
-
         try {
             int monkeyStartX = 50;
             int monkeyStartY = GROUND_LEVEL - MONKEY_HEIGHT - 50;
@@ -152,7 +160,6 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
             monkeyController = new MonkeyController(monkey);
             monkeyController.setGamePanel(this);
             obstacleController = new ObstacleController(PANEL_WIDTH, PLAY_LEVEL, this);
-
 
             for (Obstacle obstacle : obstacleController.getObstacles()) {
                 obstacle.setCollisionListener(this);
@@ -164,7 +171,6 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error setting up game", e);
         }
-
     }
 private void startNotificationTimer() {
     if (notificationTimer != null) {
@@ -177,24 +183,36 @@ private void startNotificationTimer() {
         notificationTimer = null;
     }
     try {
-        notificationTimer = new Timer();
+        notificationTimer = new java.util.Timer();
         notificationTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
+                LOGGER.info("Checking notification: Paused=" + isPaused + ", GameOver=" + isGameOver + ", TutorialActive=" + tutorialActive);
                 if (!isPaused && !isGameOver && !tutorialActive) {
                     notificationMessage = gameView.getGameController().getRandomNotification();
-                    if (notificationMessage != null) {
+                    LOGGER.info("Notification message fetched: " + (notificationMessage != null ? notificationMessage : "null"));
+                    if (notificationMessage != null && !notificationMessage.isEmpty()) {
                         showNotification = true;
                         if (notificationSound != null) {
-                            notificationSound.setFramePosition(0);
-                            notificationSound.start();
+                            try {
+                                notificationSound.setFramePosition(0);
+                                notificationSound.start();
+                            } catch (Exception e) {
+                                LOGGER.log(Level.WARNING, "Error playing notification sound", e);
+                            }
                         }
-                        SwingUtilities.invokeLater(() -> repaint());
-                        new Timer().schedule(new TimerTask() {
+                        SwingUtilities.invokeLater(() -> {
+                            repaint();
+                            LOGGER.info("Repaint triggered for notification");
+                        });
+                        new java.util.Timer().schedule(new TimerTask() {
                             @Override
                             public void run() {
                                 showNotification = false;
-                                SwingUtilities.invokeLater(() -> repaint());
+                                SwingUtilities.invokeLater(() -> {
+                                    repaint();
+                                    LOGGER.info("Notification hidden");
+                                });
                             }
                         }, 5000);
                         LOGGER.info("Notification displayed: " + notificationMessage);
@@ -205,26 +223,24 @@ private void startNotificationTimer() {
                     LOGGER.info("Notification skipped: Paused=" + isPaused + ", GameOver=" + isGameOver + ", TutorialActive=" + tutorialActive);
                 }
             }
-        }, 10_000, 120_000); // Changed initial delay from 30_000 to 10_000
+        }, 10_000, 120_000);
         LOGGER.info("Notification timer started with initial delay: 10 seconds");
     } catch (Exception e) {
         LOGGER.log(Level.SEVERE, "Error starting notification timer", e);
     }
 }
-     
-
+               
+             
 
     private void startGameLoop() {
         try {
-            gameLoop = new Timer(FRAME_DELAY, this);
+            gameLoop = new javax.swing.Timer(FRAME_DELAY, this); // Explicitly use javax.swing.Timer
             gameLoop.start();
             LOGGER.info("Game loop started, running=" + gameLoop.isRunning());
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error starting game loop", e);
         }
-
     }
-}
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -245,7 +261,6 @@ private void startNotificationTimer() {
         updateBananas();
         checkCollisions();
     }
-    
 
     private void updateBackground() {
         if (jungle1 == null || jungle2 == null) {
@@ -264,27 +279,27 @@ private void startNotificationTimer() {
         }
     }
 
-
     private void updateMonkey() {
-        monkey.update();
+        if (monkey != null) {
+            monkey.update();
 
-        if (monkey.getX() < MONKEY_MIN_X) {
-            monkey.setX(MONKEY_MIN_X);
-            monkey.setVelocityX(0);
-        }
-        if (monkey.getX() > MONKEY_MAX_X) {
-            monkey.setX(MONKEY_MAX_X);
-            monkey.setVelocityX(0);
-        }
+            if (monkey.getX() < MONKEY_MIN_X) {
+                monkey.setX(MONKEY_MIN_X);
+                monkey.setVelocityX(0);
+            }
+            if (monkey.getX() > MONKEY_MAX_X) {
+                monkey.setX(MONKEY_MAX_X);
+                monkey.setVelocityX(0);
+            }
 
-        int groundY = GROUND_LEVEL - MONKEY_HEIGHT - 50;
-        float tolerance = 1.0f;
-        if (monkey.getY() >= groundY - tolerance) {
-            monkey.setY(groundY);
-            monkey.setOnGround(true);
-            monkey.setVelocityY(0);
-        } else {
-            monkey.setOnGround(false);
+            int groundY = GROUND_LEVEL - MONKEY_HEIGHT - 50;
+            if (monkey.getY() > groundY) {
+                monkey.setY(groundY);
+                monkey.setOnGround(true);
+                monkey.setVelocityY(0);
+            } else {
+                monkey.setOnGround(false);
+            }
         }
     }
 
@@ -316,27 +331,27 @@ private void startNotificationTimer() {
         }
     }
 
-    @Override
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
-        setupGraphics(g2d);
-
-        drawBackground(g2d);
-        drawGround(g2d);
-        drawGameObjects(g2d);
-        drawUI(g2d);
-
-        if (tutorial.isVisible()) {
-            drawTutorialOverlay(g2d);
-        }
+   @Override
+protected void paintComponent(Graphics g) {
+    super.paintComponent(g);
+    Graphics2D g2d = (Graphics2D) g;
+    setupGraphics(g2d);
+    drawBackground(g2d);
+    drawGround(g2d);
+    drawGameObjects(g2d);
+    drawUI(g2d);
+    if (showNotification && notificationMessage != null) {
+        drawNotificationOverlay(g2d);
     }
+    if (tutorial.isVisible()) {
+        drawTutorialOverlay(g2d);
+    }
+}
 
     private void setupGraphics(Graphics2D g2d) {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
     }
-
 
     private void drawBackground(Graphics2D g2d) {
         if (jungle1 != null && jungle2 != null) {
@@ -379,36 +394,30 @@ private void startNotificationTimer() {
     }
 
     private void drawObstacles(Graphics2D g2d) {
-        if (obstacleImage != null) {
-            if (obstacleController == null || obstacleController.getObstacles() == null) {
-                LOGGER.log(Level.WARNING, "Cannot draw obstacles: obstacleController or obstacles list is null");
-                return;
-            }
+        if (obstacleImage != null && obstacleController != null) {
             for (Obstacle obstacle : obstacleController.getObstacles()) {
                 if (obstacle.isActive()) {
-                    g2d.drawImage(obstacleImage, 
-                                obstacle.getX(), 
-                                obstacle.getY(), 
-                                obstacle.getWidth(), 
-                                obstacle.getHeight(), 
-                                null);
+                    g2d.drawImage(obstacleImage, obstacle.getX(), obstacle.getY(),
+                            obstacle.getWidth(), obstacle.getHeight(), null);
                 }
             }
-        } else {
-            LOGGER.log(Level.WARNING, "Cannot draw obstacles: obstacleImage not loaded");
         }
     }
 
-    private void drawNotificationOverlay(Graphics2D g2d) {
-        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8f));
-        g2d.setColor(new Color(0, 0, 0, 200));
-        int popupWidth = 400;
+private void drawNotificationOverlay(Graphics2D g2d) {
+        // Set composite (no transparency needed for fully opaque background)
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+        // Fully opaque black background
+        g2d.setColor(new Color(0, 0, 0));
+        // Slightly increase width from 400 to 450, keep original height
+        int popupWidth = 450;
         int popupHeight = 100;
-        int x = (PANEL_WIDTH - popupWidth) / 2;
-        int y = 100;
+        // Center horizontally, move up to y=50
+        int x = (PANEL_WIDTH - popupWidth) / 2; // (1200 - 450) / 2 = 375
+        int y = 50;
         g2d.fillRoundRect(x, y, popupWidth, popupHeight, 20, 20);
 
-        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+        // Text rendering
         g2d.setColor(Color.YELLOW);
         g2d.setFont(new Font("Segoe UI Emoji", Font.BOLD, 18));
         FontMetrics fm = g2d.getFontMetrics();
@@ -416,33 +425,6 @@ private void startNotificationTimer() {
         int textX = x + (popupWidth - textWidth) / 2;
         int textY = y + popupHeight / 2 + fm.getAscent() / 2;
         g2d.drawString(notificationMessage, textX, textY);
-    }
-
-    private void setupGraphics(Graphics2D g2d) {
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
-                            RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, 
-                            RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
-        setupGraphics(g2d);
-        
-        drawBackground(g2d);
-        drawGround(g2d);
-        drawGameObjects(g2d);
-        drawUI(g2d);
-        
-        if (showNotification && notificationMessage != null) {
-            drawNotificationOverlay(g2d);
-        }
-        
-        if (tutorial.isVisible()) {
-            drawTutorialOverlay(g2d);
-        }
     }
 
     private void drawTutorialOverlay(Graphics2D g2d) {
@@ -468,19 +450,6 @@ private void startNotificationTimer() {
             g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
         }
     }
-
-
-    private void drawObstacles(Graphics2D g2d) {
-        if (obstacleImage != null && obstacleController != null) {
-            for (Obstacle obstacle : obstacleController.getObstacles()) {
-                if (obstacle.isActive()) {
-                    g2d.drawImage(obstacleImage, obstacle.getX(), obstacle.getY(),
-                            obstacle.getWidth(), obstacle.getHeight(), null);
-                }
-            }
-        }
-    }
-
 
     private void drawUI(Graphics2D g2d) {
         if (gameView == null && bananaView != null && bananaController != null) {
@@ -527,31 +496,6 @@ private void startNotificationTimer() {
         textWidth = fm.stringWidth(restartText);
         g2d.drawString(restartText, (PANEL_WIDTH - textWidth) / 2, PANEL_HEIGHT / 2 + 20);
     }
-    
-    private void updateMonkey() {
-        if (monkey != null) {
-            monkey.update();
-            
-            if (monkey.getX() < MONKEY_MIN_X) {
-                monkey.setX(MONKEY_MIN_X);
-                monkey.setVelocityX(0);
-            }
-            if (monkey.getX() > MONKEY_MAX_X) {
-                monkey.setX(MONKEY_MAX_X);
-                monkey.setVelocityX(0);
-            }
-            
-            int groundY = GROUND_LEVEL - MONKEY_HEIGHT - 50;
-            if (monkey.getY() > groundY) {
-                monkey.setY(groundY);
-                monkey.setOnGround(true);
-                monkey.setVelocityY(0);
-            } else {
-                monkey.setOnGround(false);
-            }
-        }
-    }
-
 
     @Override
     public void onObstacleCollision(Obstacle obstacle) {
@@ -559,7 +503,6 @@ private void startNotificationTimer() {
             LOGGER.info("Obstacle collision at x=" + obstacle.getX() + ", y=" + obstacle.getY());
             handleGameOver();
         }
-
     }
 
     private void handleGameOver() {
@@ -638,17 +581,18 @@ private void startNotificationTimer() {
         }
     }
 
-
-    private class GameKeyListener extends KeyAdapter {
-        @Override
-        public void keyPressed(KeyEvent e) {
-            if (tutorial.isVisible()) {
-                tutorial.setVisible(false);
-                tutorialActive = false;
-                requestFocusInWindow();
-                LOGGER.info("Tutorial dismissed, tutorialActive=" + tutorialActive);
-                return;
-            }
+   private class GameKeyListener extends KeyAdapter {
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (tutorial.isVisible()) {
+            tutorial.setVisible(false);
+            tutorialActive = false;
+            requestFocusInWindow();
+            LOGGER.info("Tutorial dismissed, tutorialActive=" + tutorialActive);
+            startNotificationTimer(); // Restart timer after tutorial dismissal
+            return;
+        }
+       
 
             if (e.getKeyCode() == KeyEvent.VK_P) {
                 togglePause();
@@ -663,10 +607,8 @@ private void startNotificationTimer() {
                     System.exit(0);
                 }
             }
-
         }
     }
-}
 
     public boolean isTutorialActive() {
         return tutorialActive;
@@ -689,30 +631,28 @@ private void startNotificationTimer() {
     }
 
     public void cleanup() {
-    if (gameLoop != null) {
-        try {
-            gameLoop.cancel();
-            gameLoop.purge();
-            LOGGER.info("Game loop timer canceled and purged");
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error canceling game loop timer", e);
+        if (gameLoop != null) {
+            try {
+                gameLoop.stop(); // Use stop() for javax.swing.Timer
+                LOGGER.info("Game loop timer stopped");
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Error stopping game loop timer", e);
+            }
+            gameLoop = null;
         }
-        gameLoop = null;
-    }
-    if (notificationTimer != null) {
-        try {
-            notificationTimer.cancel();
-            LOGGER.info("Notification timer canceled");
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error canceling notification timer", e);
+        if (notificationTimer != null) {
+            try {
+                notificationTimer.cancel();
+                LOGGER.info("Notification timer canceled");
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Error canceling notification timer", e);
+            }
+            notificationTimer = null;
         }
-
         if (scoreController != null) {
             scoreController.dispose();
         }
         LOGGER.info("GamePanel cleaned up");
-
+        LOGGER.info("GamePanel cleanup completed");
     }
-    LOGGER.info("GamePanel cleanup completed");
-}
 }

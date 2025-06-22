@@ -1,55 +1,54 @@
 package demogame.controller;
 
+import demogame.dao.NotificationDao;
 import demogame.dao.ScoreDao;
 import demogame.dao.UserDao;
+import demogame.model.Notification;
 import demogame.model.UserData;
+import demogame.util.DatabaseConnection;
 import demogame.view.AdminView1;
 import demogame.view.AdminView2;
 import demogame.view.AdminView3;
-import java.awt.Dimension;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import demogame.util.DatabaseConnection;
-// hangle admin interface navigations
 public class AdminController implements ScoreDao.ScoreUpdateListener {
-    // Logger for logging applications events and errors-> this is java.util.logging component
     private static final Logger LOGGER = Logger.getLogger(AdminController.class.getName());
 
     private final UserDao userDao;
     private ScoreDao scoreDao;
+    private final NotificationDao notificationDao; // Added for notification handling
     private final AdminView1 dashboardFrame;
     private final AdminView2 userFrame;
     private final AdminView3 notificationFrame;
     private AdminView1 adminView1;
-    private AdminView2 adminView2; //optional
+    private AdminView2 adminView2;
     private AdminView3 adminView3;
-    private boolean listenerRegistered = false; // this is added  to track listener registration
+    private boolean listenerRegistered = false;
 
     public AdminController() {
         userDao = new UserDao();
-        userFrame = new AdminView2(this); // initializing  the final field userFrame
+        notificationDao = new NotificationDao(); // Initialize NotificationDao
+        userFrame = new AdminView2(this);
         try {
-            // check for admin user existence in database
             userDao.ensureAdminUser();
             LOGGER.info("Admin user ensured successfully");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error ensuring admin user", e);
             e.printStackTrace();
         }
-        // score logics
+
+        // Initialize ScoreDao
         scoreDao = null;
         int scoreDaoAttempts = 0;
-        final int MAX_SCORE_DAO_ATTEMPTS = 2; // Added for multiple attempts
+        final int MAX_SCORE_DAO_ATTEMPTS = 2;
         while (scoreDao == null && scoreDaoAttempts < MAX_SCORE_DAO_ATTEMPTS) {
             scoreDaoAttempts++;
             try {
@@ -63,33 +62,33 @@ public class AdminController implements ScoreDao.ScoreUpdateListener {
         if (scoreDao == null) {
             LOGGER.severe("Failed to initialize ScoreDao after " + MAX_SCORE_DAO_ATTEMPTS + " attempts");
         }
-        //acts as listener to makesure that scoredao initialized
 
+        // Register score update listener
         try {
             if (scoreDao != null) {
                 try {
                     LOGGER.info("Attempting to add score update listener, AdminController instance: " + this + ", type: " + this.getClass().getName());
                     scoreDao.addUpdateListener(this);
-                    listenerRegistered = true; //track success
+                    listenerRegistered = true;
                     LOGGER.info("Score update listener added successfully");
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "Failed to add score update listener, proceeding with initialization", e);
                     e.printStackTrace();
-                    listenerRegistered = false; // track failure
+                    listenerRegistered = false;
                     LOGGER.info("Continuing AdminController initialization despite listener registration failure");
                 }
             } else {
                 LOGGER.severe("ScoreDao is null, cannot add score update listener, proceeding with initialization");
-                listenerRegistered = false; //  track failure
+                listenerRegistered = false;
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error adding score update listener, proceeding with initialization", e);
             e.printStackTrace();
-            listenerRegistered = false; //  track failure
+            listenerRegistered = false;
             LOGGER.info("Continuing AdminController initialization despite outer listener error");
         }
 
-        // initializing adminView1
+        // Initialize adminView1
         adminView1 = null;
         try {
             adminView1 = new AdminView1();
@@ -97,7 +96,6 @@ public class AdminController implements ScoreDao.ScoreUpdateListener {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error initializing AdminView1", e);
             e.printStackTrace();
-            // Fallback attempt
             try {
                 adminView1 = new AdminView1();
                 LOGGER.info("AdminView1 fallback initialization successful");
@@ -108,8 +106,9 @@ public class AdminController implements ScoreDao.ScoreUpdateListener {
         }
 
         dashboardFrame = adminView1;
-        this.notificationFrame = new AdminView3();
-        // initialize
+        notificationFrame = new AdminView3(this); // Pass 'this' instead of null
+
+        // Initialize adminView2
         adminView2 = null;
         try {
             adminView2 = new AdminView2(this);
@@ -117,7 +116,6 @@ public class AdminController implements ScoreDao.ScoreUpdateListener {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error initializing AdminView2", e);
             e.printStackTrace();
-          
             try {
                 adminView2 = new AdminView2(this);
                 LOGGER.info("AdminView2 fallback initialization successful");
@@ -127,24 +125,24 @@ public class AdminController implements ScoreDao.ScoreUpdateListener {
             }
         }
 
+        // Initialize adminView3
         adminView3 = null;
         try {
-            adminView3 = new AdminView3();
+            adminView3 = new AdminView3(this); // Pass 'this' instead of null
             LOGGER.info("AdminView3 initialized successfully");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error initializing AdminView3", e);
             e.printStackTrace();
-            
             try {
-                adminView3 = new AdminView3();
+                adminView3 = new AdminView3(this);
                 LOGGER.info("AdminView3 fallback initialization successful");
             } catch (Exception fallbackException) {
                 LOGGER.log(Level.SEVERE, "AdminView3 fallback initialization failed", fallbackException);
                 fallbackException.printStackTrace();
             }
         }
-        // checking for database connectiion
 
+        // Verify database connection
         try {
             verifyDatabaseConnection();
             LOGGER.info("Database connection verified successfully");
@@ -158,7 +156,7 @@ public class AdminController implements ScoreDao.ScoreUpdateListener {
             });
         }
 
-        // navigation logic between buttons
+        // Setup navigation
         try {
             setupNavigation();
             LOGGER.info("Navigation setup completed successfully");
@@ -185,10 +183,10 @@ public class AdminController implements ScoreDao.ScoreUpdateListener {
                     JOptionPane.ERROR_MESSAGE);
             });
         }
-        // log initialization status
+
         LOGGER.info("AdminController initialized, adminView1: " + (adminView1 != null));
         LOGGER.info("DashboardFrame initialized: " + (dashboardFrame != null));
-        LOGGER.info("Listener registered: " + listenerRegistered); // Added to track listener status
+        LOGGER.info("Listener registered: " + listenerRegistered);
         if (dashboardFrame == null) {
             SwingUtilities.invokeLater(() -> {
                 JOptionPane.showMessageDialog(null,
@@ -198,6 +196,31 @@ public class AdminController implements ScoreDao.ScoreUpdateListener {
             });
         }
         LOGGER.info("AdminController constructor completed");
+    }
+
+    // Get all notifications from NotificationDao
+    public List<Notification> getNotifications() {
+        try {
+            return notificationDao.getAllNotifications();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error retrieving notifications", e);
+            throw new RuntimeException("Failed to retrieve notifications", e);
+        }
+    }
+
+    // Add a new notification via NotificationDao
+    public void addNotification(String message) {
+        try {
+            boolean success = notificationDao.addNotification(message);
+            if (!success) {
+                LOGGER.warning("Failed to add notification: " + message);
+                throw new RuntimeException("Failed to add notification");
+            }
+            LOGGER.info("Notification added successfully: " + message);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error adding notification", e);
+            throw new RuntimeException("Failed to add notification", e);
+        }
     }
 
     public JFrame getDashboardFrame() {
@@ -231,15 +254,14 @@ public class AdminController implements ScoreDao.ScoreUpdateListener {
             throw new RuntimeException("Database connection failed", e);
         }
     }
-    //this methods loads and updates dashboard datas like user counts and active user- which is the main feature of admin dasboard
+
     private void loadDashboardData() {
         try {
             int totalUsers = userDao.getTotalUserCount();
-            int activeUsers = (scoreDao != null && listenerRegistered) ? scoreDao.getActiveUserCount() : 0; // Modified to check listenerRegistered
+            int activeUsers = (scoreDao != null && listenerRegistered) ? scoreDao.getActiveUserCount() : 0;
             String newestUser = userDao.getNewestUser();
-            
-            List<ScoreDao.ActiveUserScore> activeUsersList = (scoreDao != null && listenerRegistered) ? scoreDao.getRecentActiveUsers() : new ArrayList<>(); // Modified to check listenerRegistered
-            
+            List<ScoreDao.ActiveUserScore> activeUsersList = (scoreDao != null && listenerRegistered) ? scoreDao.getRecentActiveUsers() : new ArrayList<>();
+
             SwingUtilities.invokeLater(() -> {
                 if (dashboardFrame != null) {
                     dashboardFrame.updateDashboardStats(totalUsers, activeUsers, newestUser);
@@ -249,7 +271,6 @@ public class AdminController implements ScoreDao.ScoreUpdateListener {
                     LOGGER.severe("Cannot update dashboard data: dashboardFrame is null");
                 }
             });
-            
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error loading dashboard data", e);
             SwingUtilities.invokeLater(() -> {
@@ -261,7 +282,6 @@ public class AdminController implements ScoreDao.ScoreUpdateListener {
             });
         }
     }
-    // this diplays all
 
     private void loadAndDisplayUsers() {
         try {
@@ -275,14 +295,14 @@ public class AdminController implements ScoreDao.ScoreUpdateListener {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to load users", e);
             if (userFrame != null) {
-                JOptionPane.showMessageDialog(userFrame, 
-                    "Error loading users: " + e.getMessage(), 
-                    "Error", 
+                JOptionPane.showMessageDialog(userFrame,
+                    "Error loading users: " + e.getMessage(),
+                    "Error",
                     JOptionPane.ERROR_MESSAGE);
             }
         }
     }
-// retrive user datas by username
+
     public UserData getUserDetails(String username) {
         try {
             return userDao.getUserByUsername(username);
@@ -297,24 +317,22 @@ public class AdminController implements ScoreDao.ScoreUpdateListener {
             UserData originalUser = userDao.getUserByUsername(originalUsername);
             if (originalUser == null) {
                 if (userFrame != null) {
-                    JOptionPane.showMessageDialog(userFrame, 
-                        "Original user not found. Cannot update.", 
-                        "Error", 
+                    JOptionPane.showMessageDialog(userFrame,
+                        "Original user not found. Cannot update.",
+                        "Error",
                         JOptionPane.ERROR_MESSAGE);
                 }
                 return;
             }
-            // create update user object
 
             UserData updatedUser = new UserData(
-                originalUser.getId(), 
-                newUsername, 
-                newEmail, 
+                originalUser.getId(),
+                newUsername,
+                newEmail,
                 newPassword,
                 originalUser.getRole()
             );
-            // this update user in db
-            
+
             boolean success = userDao.updateUser(updatedUser);
             if (success) {
                 if (userFrame != null) {
@@ -324,23 +342,22 @@ public class AdminController implements ScoreDao.ScoreUpdateListener {
                 }
             } else {
                 if (userFrame != null) {
-                    JOptionPane.showMessageDialog(userFrame, 
-                        "Failed to update user: " + userDao.getErrorMessage(), 
-                        "Error", 
+                    JOptionPane.showMessageDialog(userFrame,
+                        "Failed to update user: " + userDao.getErrorMessage(),
+                        "Error",
                         JOptionPane.ERROR_MESSAGE);
                 }
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error updating user", e);
             if (userFrame != null) {
-                JOptionPane.showMessageDialog(userFrame, 
-                    "Error updating user: " + e.getMessage(), 
-                    "Error", 
+                JOptionPane.showMessageDialog(userFrame,
+                    "Error updating user: " + e.getMessage(),
+                    "Error",
                     JOptionPane.ERROR_MESSAGE);
             }
         }
     }
-    // since admin has access to add new user , admin adding new user to db
 
     public void addUser(String name, String username, String email, String password) {
         try {
@@ -355,31 +372,30 @@ public class AdminController implements ScoreDao.ScoreUpdateListener {
                 }
             } else {
                 if (userFrame != null) {
-                    JOptionPane.showMessageDialog(userFrame, 
-                        "Error adding user: " + userDao.getErrorMessage(), 
-                        "Error", 
+                    JOptionPane.showMessageDialog(userFrame,
+                        "Error adding user: " + userDao.getErrorMessage(),
+                        "Error",
                         JOptionPane.ERROR_MESSAGE);
                 }
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error adding user", e);
             if (userFrame != null) {
-                JOptionPane.showMessageDialog(userFrame, 
-                    "Error adding user: " + e.getMessage(), 
-                    "Error", 
+                JOptionPane.showMessageDialog(userFrame,
+                    "Error adding user: " + e.getMessage(),
+                    "Error",
                     JOptionPane.ERROR_MESSAGE);
             }
         }
     }
-    // deletes
 
     public void deleteUser(String username) {
         try {
             if (username == null || username.isEmpty()) {
                 if (userFrame != null) {
-                    JOptionPane.showMessageDialog(userFrame, 
-                        "Please select a user to delete.", 
-                        "Warning", 
+                    JOptionPane.showMessageDialog(userFrame,
+                        "Please select a user to delete.",
+                        "Warning",
                         JOptionPane.WARNING_MESSAGE);
                 }
                 return;
@@ -401,7 +417,7 @@ public class AdminController implements ScoreDao.ScoreUpdateListener {
                     "Confirm Deletion",
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.WARNING_MESSAGE);
-                
+
                 if (response == JOptionPane.YES_OPTION) {
                     boolean success = userDao.deleteUserByUsername(username);
                     if (success) {
@@ -409,9 +425,9 @@ public class AdminController implements ScoreDao.ScoreUpdateListener {
                         loadAndDisplayUsers();
                         loadDashboardData();
                     } else {
-                        JOptionPane.showMessageDialog(userFrame, 
-                            "Error deleting user: " + userDao.getErrorMessage(), 
-                            "Error", 
+                        JOptionPane.showMessageDialog(userFrame,
+                            "Error deleting user: " + userDao.getErrorMessage(),
+                            "Error",
                             JOptionPane.ERROR_MESSAGE);
                     }
                 }
@@ -442,7 +458,6 @@ public class AdminController implements ScoreDao.ScoreUpdateListener {
             throw e;
         }
     }
-    // navigation buttons
 
     private void setupNavigation() {
         if (dashboardFrame != null) {
@@ -474,24 +489,23 @@ public class AdminController implements ScoreDao.ScoreUpdateListener {
             LOGGER.severe("notificationFrame is null, cannot set up navigation for notification frame");
         }
     }
-    // navigating events between dashboard, user and notification
 
-    private void navigateToDashboard(ActionEvent e) { 
-        showDashboard(); 
+    private void navigateToDashboard(ActionEvent e) {
+        showDashboard();
     }
-    
-    private void navigateToUser(ActionEvent e) { 
-        loadAndDisplayUsers(); 
-        showUser(); 
+
+    private void navigateToUser(ActionEvent e) {
+        loadAndDisplayUsers();
+        showUser();
     }
-    
-    private void navigateToNotification(ActionEvent e) { 
-        showNotification(); 
+
+    private void navigateToNotification(ActionEvent e) {
+        showNotification();
     }
-    
-    private void showDashboard() { 
+
+    private void showDashboard() {
         LOGGER.info("Showing dashboard");
-        hideAllFrames(); 
+        hideAllFrames();
         loadDashboardData();
         if (dashboardFrame != null) {
             dashboardFrame.setVisible(true);
@@ -499,25 +513,25 @@ public class AdminController implements ScoreDao.ScoreUpdateListener {
             LOGGER.severe("dashboardFrame is null, cannot show dashboard");
         }
     }
-    
-    private void showUser() { 
-        hideAllFrames(); 
+
+    private void showUser() {
+        hideAllFrames();
         if (userFrame != null) {
             userFrame.setVisible(true);
         } else {
             LOGGER.severe("userFrame is null, cannot show user frame");
         }
     }
-    
-    private void showNotification() { 
-        hideAllFrames(); 
+
+    private void showNotification() {
+        hideAllFrames();
         if (notificationFrame != null) {
             notificationFrame.setVisible(true);
         } else {
             LOGGER.severe("notificationFrame is null, cannot show notification frame");
         }
     }
-    
+
     private void hideAllFrames() {
         if (dashboardFrame != null) {
             dashboardFrame.setVisible(false);

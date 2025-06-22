@@ -16,45 +16,45 @@ public class LoadingView extends JFrame {
 
     public LoadingView() {
         try {
-    setTitle("Loading");
-    setSize(1200, 800);
-    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    setLocationRelativeTo(null);
-    setResizable(false);
+            setTitle("Loading");
+            setSize(1200, 800);
+            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            setLocationRelativeTo(null);
+            setResizable(false);
 
-    // Set background
-    ImageIcon backgroundIcon = new ImageIcon(getClass().getResource("/resources/Loadingbg.jpg"));
-    if (backgroundIcon.getImage() == null) {
-        LOGGER.warning("Failed to load background image: /resources/Loadingbg.jpg");
-        setContentPane(new JPanel()); // Fallback to empty panel
-    } else {
-        setContentPane(new JLabel(backgroundIcon));
-    }
-    getContentPane().setLayout(new GridBagLayout());
+            // Set background
+            ImageIcon backgroundIcon = new ImageIcon(getClass().getResource("/resources/Loadingbg.jpg"));
+            // if (backgroundIcon.getImage() == null) {
+            //     LOGGER.warning("Failed to load background image: /resources/Loadingbg.jpg");
+            //     setContentPane(new JPanel()); // Fallback to empty panel
+            // } else {
+                setContentPane(new JLabel(backgroundIcon));
+            // }
+            getContentPane().setLayout(new GridBagLayout());
 
-    initializeComponents();
-    layoutComponents();
-} catch (Exception e) {
-    LOGGER.log(Level.SEVERE, "Error initializing LoadingView", e);
-    // Do not show JOptionPane; proceed with fallback
-    setContentPane(new JPanel()); // Ensure frame has a content pane
-    getContentPane().setLayout(new GridBagLayout());
-    initializeComponents(); // Retry initializing components
-    layoutComponents();
-}
+            initializeComponents();
+            layoutComponents();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error initializing LoadingView", e);
+            // // Do not show JOptionPane; proceed with fallback
+            // setContentPane(new JPanel()); // Ensure frame has a content pane
+            // getContentPane().setLayout(new GridBagLayout());
+            // initializeComponents(); // Retry initializing components
+            // layoutComponents();
+        }
     }
 
     private void initializeComponents() {
         try {
             // Logo setup
             ImageIcon logoIcon = new ImageIcon(getClass().getResource("/resources/logoo.png"));
-            if (logoIcon.getImage() == null) {
-                LOGGER.warning("Failed to load logo image: /resources/logoo.png");
-                logoLabel = new JLabel("Funky Monkey");
-            } else {
+            // if (logoIcon.getImage() == null) {
+            //     LOGGER.warning("Failed to load logo image: /resources/logoo.png");
+            //     logoLabel = new JLabel("Funky Monkey");
+            // } else {
                 Image scaledLogo = logoIcon.getImage().getScaledInstance(300, 300, Image.SCALE_SMOOTH);
                 logoLabel = new JLabel(new ImageIcon(scaledLogo));
-            }
+            // }
 
             // Progress bar
             progressBar = new JProgressBar(0, 100);
@@ -75,10 +75,10 @@ public class LoadingView extends JFrame {
             tipLabel.setHorizontalAlignment(SwingConstants.CENTER);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error initializing components", e);
-            JOptionPane.showMessageDialog(null,
-                "Error initializing loading screen: " + e.getMessage(),
-                "Loading Error",
-                JOptionPane.ERROR_MESSAGE);
+            // // Initialize fallback components
+            // logoLabel = new JLabel("Funky Monkey");
+            // progressBar = new JProgressBar(0, 100);
+            // tipLabel = new JLabel("Loading tips...");
         }
     }
 
@@ -117,10 +117,12 @@ public class LoadingView extends JFrame {
             LOGGER.info("LoadingView components laid out successfully");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error laying out components", e);
-            JOptionPane.showMessageDialog(null,
-                "Error setting up loading screen layout: " + e.getMessage(),
-                "Loading Error",
-                JOptionPane.ERROR_MESSAGE);
+            // // Fallback layout
+            // getContentPane().setLayout(new FlowLayout());
+            // getContentPane().add(logoLabel);
+            // getContentPane().add(loadingLabel);
+            // getContentPane().add(progressBar);
+            // getContentPane().add(tipLabel);
         }
     }
 
