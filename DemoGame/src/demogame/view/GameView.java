@@ -4,149 +4,123 @@ import demogame.controller.GameController;
 import demogame.model.GameOverListener;
 import javax.swing.*;
 import java.awt.*;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
+// View for the game window, hosting GamePanel and displaying score
 public class GameView extends JFrame implements GameOverListener {
     private static final Logger LOGGER = Logger.getLogger(GameView.class.getName());
-    
-    private JLabel scoreLabel;
-    private GamePanel gamePanel;
-    private GameController gameController;
-    private int currentScore = 0;
 
-    // Constructor
+    private final GameController gameController;
+    private GamePanel gamePanel;
+    private JLabel scoreLabel;
+    private int currentScore;
+
     public GameView(GameController controller) {
         this.gameController = controller;
-        initializeUI();
-    }
-
-    private void initializeUI() {
-        setTitle("DemoGame - Play");
+        initializeComponents();
+        setTitle("Monkey Game");
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setSize(1200, 800);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
-
-        JLayeredPane layeredPane = new JLayeredPane();
-        layeredPane.setPreferredSize(new Dimension(1200, 800));
-        setContentPane(layeredPane);
-
-        gamePanel = new GamePanel(this);
-        gamePanel.setBounds(0, 0, 1200, 800);
-        layeredPane.add(gamePanel, JLayeredPane.DEFAULT_LAYER);
-
-        scoreLabel = new JLabel("Score: 0");
-        scoreLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        scoreLabel.setForeground(Color.WHITE);
-        scoreLabel.setBounds(20, 10, 200, 30);
-        layeredPane.add(scoreLabel, JLayeredPane.PALETTE_LAYER);
-
-        // Set BananaController in GameController
-        gameController.setBananaController(gamePanel.getBananaController());
-
-        setupWindowListener();
-    }
-
-    private void setupWindowListener() {
         addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                LOGGER.info("Window closing, saving score: " + currentScore);
-                handleGameExit();
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                gameController.quitGame();
+            }
+        });
+        LOGGER.info("GameView initialized for userId: " + controller.getUserId());
+    }
+
+    private void initializeComponents() {
+        JLayeredPane layeredPane = new JLayeredPane();
+        layeredPane.setLayout(null);
+
+        try {
+            gamePanel = new GamePanel(this);
+            gamePanel.setBounds(0, 0, 1200, 800);
+            layeredPane.add(gamePanel, JLayeredPane.DEFAULT_LAYER);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error initializing GamePanel", e);
+            JOptionPane.showMessageDialog(this, "Failed to initialize game.", "Error", JOptionPane.ERROR_MESSAGE);
+            gameController.quitGame();
+            return;
+        }
+
+        scoreLabel = new JLabel("Score: 0");
+        scoreLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 24));
+        scoreLabel.setForeground(Color.WHITE);
+        scoreLabel.setBounds(10, 10, 200, 30);
+        layeredPane.add(scoreLabel, JLayeredPane.PALETTE_LAYER);
+
+        setContentPane(layeredPane);
+
+        addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyPressed(java.awt.event.KeyEvent e) {
+                if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE) {
+                    showPauseMenu();
+                }
             }
         });
     }
 
-    @Override
-    public void onGameOver() {
-        int finalScore = getCurrentScore();
-        LOGGER.info("Game over, saving final score: " + finalScore);
-        gameController.saveScore(finalScore);
-        
+    public void updateScore(int score) {
+        this.currentScore = score;
         SwingUtilities.invokeLater(() -> {
-            int choice = JOptionPane.showConfirmDialog(
-                this,
-                "Game Over!\nFinal Score: " + finalScore + "\nWould you like to play again?",
-                "Game Over",
-                JOptionPane.YES_NO_OPTION
-            );
-
-            if (choice == JOptionPane.YES_OPTION) {
-                restartGame();
-            } else {
-                handleGameExit();
-            }
+            scoreLabel.setText("Score: " + score);
+            LOGGER.info("Score updated: " + score);
         });
     }
 
     public void showPauseMenu() {
         if (gamePanel != null) {
-            Object[] options = {"Resume", "Restart", "Quit"};
-            int choice = JOptionPane.showOptionDialog(
-                this,
-                "Game Paused",
-                "Pause Menu",
-                JOptionPane.YES_NO_CANCEL_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                options,
-                options[0]
-            );
+            gamePanel.togglePause();
+        }
+        String[] options = {"Resume", "Restart", "Quit"};
+        int choice = JOptionPane.showOptionDialog(
+            this,
+            "Game Paused",
+            "Pause Menu",
+            JOptionPane.DEFAULT_OPTION,
+            JOptionPane.INFORMATION_MESSAGE,
+            null,
+            options,
+            options[0]
+        );
 
-            switch (choice) {
-                case 0: // Resume
+        switch (choice) {
+            case 0: // Resume
+                if (gamePanel != null) {
                     gamePanel.togglePause();
-                    break;
-                case 1: // Restart
-                    restartGame();
-                    break;
-                case 2: // Quit
-                    handleGameExit();
-                    break;
-            }
+                }
+                break;
+            case 1: // Restart
+                gameController.restartGame();
+                break;
+            case 2: // Quit
+                gameController.quitGame();
+                break;
         }
     }
 
-    public void updateScore(int score) {
-        this.currentScore = score;
-        LOGGER.info("Updating score display: " + score);
-        SwingUtilities.invokeLater(() -> {
-            scoreLabel.setText("Score: " + score);
-        });
-    }
-
-    public void updateScoreDisplay(int score) {
-        if (scoreLabel != null) {
-            scoreLabel.setText("Score: " + score);
-        }
-    }
-
-    public void restartGame() {
-        currentScore = 0;
-        updateScore(0);
-        if (gamePanel != null) {
-            gamePanel.restartGame();
-        }
-    }
-
-    private void handleGameExit() {
-        LOGGER.info("Exiting game, saving score: " + currentScore);
+    @Override
+    public void onGameOver() {
         gameController.saveScore(currentScore);
-        dispose();
-        gameController.showMenu();
-    }
-
-    public GamePanel getGamePanel() {
-        return gamePanel;
-    }
-
-    public int getCurrentScore() {
-        return currentScore;
-    }
-
-    public int getFinalScore() {
-        return currentScore;
+        SwingUtilities.invokeLater(() -> {
+            int choice = JOptionPane.showConfirmDialog(
+                this,
+                "Game Over! Score: " + currentScore + "\nTry again?",
+                "Game Over",
+                JOptionPane.YES_NO_OPTION
+            );
+            if (choice == JOptionPane.YES_OPTION) {
+                gameController.restartGame();
+            } else {
+                gameController.quitGame();
+            }
+        });
     }
 
     public GameController getGameController() {
@@ -157,11 +131,27 @@ public class GameView extends JFrame implements GameOverListener {
         return scoreLabel;
     }
 
-    @Override
-    public void dispose() {
+    public void cleanup() {
+        LOGGER.info("Starting GameView cleanup for userId: " + gameController.getUserId());
         if (gamePanel != null) {
-            gamePanel.cleanup();
+            try {
+                LOGGER.info("Calling GamePanel cleanup");
+                gamePanel.cleanup();
+                LOGGER.info("GamePanel cleanup completed");
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Error cleaning up GamePanel: " + e.getMessage(), e);
+            } finally {
+                gamePanel = null;
+                LOGGER.info("GamePanel set to null");
+            }
         }
-        super.dispose();
+        try {
+            removeAll();
+            setContentPane(new JPanel());
+            LOGGER.info("GameView components cleared");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error clearing GameView components: " + e.getMessage(), e);
+        }
+        LOGGER.info("GameView cleanup completed");
     }
 }
