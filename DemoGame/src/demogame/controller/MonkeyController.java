@@ -1,11 +1,12 @@
 package demogame.controller;
 
 import demogame.model.Monkey;
+import demogame.view.GamePanel;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class MonkeyController implements KeyListener {
-    // Increased speeds for better obstacle clearing
     private static final float NORMAL_MOVE_SPEED = 2.0f;
     private static final float JUMP_MOVE_SPEED = 8.0f;     // Increased from 6.0f
     private static final float JUMP_BOOST = 1.2f;          // Increased from 1.5f
@@ -18,7 +19,9 @@ public class MonkeyController implements KeyListener {
     private boolean spacePressed;
     private boolean jumpInProgress;
     private long lastJumpTime;
+    private GamePanel gamePanel;
 
+    
     public MonkeyController(Monkey monkey) {
         this.monkey = monkey;
         this.leftPressed = false;
@@ -28,8 +31,18 @@ public class MonkeyController implements KeyListener {
         this.lastJumpTime = 0;
     }
 
+    // game panel to check tutorial state
+    public void setGamePanel(GamePanel gamePanel) {
+        this.gamePanel = gamePanel;
+    }
+
+    // this for key presses to control monkey movement and jumping
     @Override
     public void keyPressed(KeyEvent e) {
+        // ignore input if tutorial is active
+        if (gamePanel != null && gamePanel.isTutorialActive()) {
+            return;
+        }
         switch (e.getKeyCode()) {
             case KeyEvent.VK_LEFT -> {
                 leftPressed = true;
@@ -37,6 +50,7 @@ public class MonkeyController implements KeyListener {
             }
             case KeyEvent.VK_RIGHT -> {
                 rightPressed = true;
+                //  forward jump if space is also pressed
                 if (spacePressed && monkey.isOnGround()) {
                     performForwardJump();
                 } else {
@@ -52,8 +66,12 @@ public class MonkeyController implements KeyListener {
         }
     }
 
+    // Handles key releases to update movement states
     @Override
     public void keyReleased(KeyEvent e) {
+        if (gamePanel != null && gamePanel.isTutorialActive()) {
+            return;
+        }
         switch (e.getKeyCode()) {
             case KeyEvent.VK_LEFT -> {
                 leftPressed = false;
@@ -65,14 +83,15 @@ public class MonkeyController implements KeyListener {
             }
             case KeyEvent.VK_SPACE, KeyEvent.VK_UP -> {
                 spacePressed = false;
-                // Don't reset jumpInProgress here to maintain momentum
             }
         }
     }
 
+    // Processes jump input, deciding between normal or forward jump-> they are special moves
     private void handleJumpInput() {
         if (monkey.isOnGround()) {
             long currentTime = System.currentTimeMillis();
+            // Prevent rapid jumps within 200ms
             if (currentTime - lastJumpTime > JUMP_WINDOW) {
                 if (rightPressed) {
                     performForwardJump();
@@ -84,33 +103,34 @@ public class MonkeyController implements KeyListener {
         }
     }
 
+    //   normal jump maintaining current direction
     private void performNormalJump() {
         monkey.jump();
         jumpInProgress = true;
-        // Maintain current horizontal velocity during normal jump
         if (rightPressed) {
-            monkey.setVelocityX(NORMAL_MOVE_SPEED * 1.5f); // Slight boost
+            monkey.setVelocityX(NORMAL_MOVE_SPEED * 1.5f);
         } else if (leftPressed) {
             monkey.setVelocityX(-NORMAL_MOVE_SPEED);
         }
     }
 
+    //forward jump with extra speed to clear obstacles
     private void performForwardJump() {
-        // Significantly increased forward momentum for obstacle clearing
         float jumpVelocity = JUMP_MOVE_SPEED * JUMP_BOOST;
         monkey.setVelocityX(jumpVelocity);
-        monkey.jumpForward(); // Use special forward jump with higher arc
+        monkey.jumpForward();
         jumpInProgress = true;
         monkey.setFacingRight(true);
     }
 
+    // update monkey movement based on key states and ground air status
     private void updateMovement() {
+        // maintain forward momentum during jump
         if (jumpInProgress && monkey.isJumping()) {
-            // Maintain strong forward momentum during jump
             if (rightPressed) {
                 float currentVelocity = monkey.getVelocityX();
                 if (currentVelocity < JUMP_MOVE_SPEED) {
-                    monkey.setVelocityX(currentVelocity + 0.5f); // Gradual acceleration
+                    monkey.setVelocityX(currentVelocity + 0.5f);
                 }
             }
             return;
@@ -128,12 +148,13 @@ public class MonkeyController implements KeyListener {
             if (monkey.isOnGround()) {
                 monkey.setVelocityX(0);
             } else {
-                // Gradual air deceleration
+                // gradually slow down in air
                 float currentVelocity = monkey.getVelocityX();
                 monkey.setVelocityX(currentVelocity * 0.98f);
             }
         }
 
+        // reset jump state when on ground
         if (monkey.isOnGround()) {
             jumpInProgress = false;
         }
@@ -141,9 +162,9 @@ public class MonkeyController implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
-        // Not used
     }
 
+    // resets all input and jump states for a new game
     public void reset() {
         leftPressed = false;
         rightPressed = false;

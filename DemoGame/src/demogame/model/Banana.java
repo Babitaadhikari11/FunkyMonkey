@@ -24,11 +24,27 @@ public class Banana {
     }
 
     // Getters and Setters
-    public int getX() { return x; }
-    public int getY() { return y; }
-    public int getWidth() { return WIDTH; }
-    public int getHeight() { return HEIGHT; }
-    public boolean isCollected() { return isCollected; }
-    public void setCollected(boolean collected) { isCollected = collected; }
-    public Rectangle getBounds() { return bounds; }
+    public int getX() {
+         return x;
+        }
+
+    public int getY() { 
+        return y; 
+    }
+    public int getWidth() { 
+        return WIDTH; 
+    }
+        
+    public int getHeight() {
+         return HEIGHT; 
+        }
+    public boolean isCollected() {
+         return isCollected; 
+        }
+    public void setCollected(boolean collected) {
+         isCollected = collected; 
+        }
+    public Rectangle getBounds() {
+         return bounds;
+         }
 }

@@ -2,13 +2,17 @@ package demogame.view;
 
 import demogame.util.RoundedPanel;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+
 import javax.swing.*;
+
 public class LoginView extends JFrame {
     public JTextField usernameField = new JTextField();
     public JPasswordField passwordField = new JPasswordField();
     public JCheckBox showPasswordCheck = new JCheckBox("Show Password");
     public JButton loginButton = new JButton("Login");
     public JLabel createAccountLink = new JLabel("<html><u>Create Account</u></html>");
+    public JLabel forgotPasswordLink = new JLabel("<html><u>Forgot Password?</u></html>");
 
     public LoginView() {
         setTitle("DemoGame - Login");
@@ -19,10 +23,13 @@ public class LoginView extends JFrame {
 
         JLayeredPane layeredPane = new JLayeredPane();
         getContentPane().add(layeredPane);
-//this is background for login page
-        
 
-         ImageIcon bgIcon = new ImageIcon(getClass().getResource("/resources/Background.jpg"));
+        // Background for login page
+        ImageIcon bgIcon = new ImageIcon(getClass().getResource("/resources/Background.jpg"));
+        if (bgIcon.getImage() == null) {
+            System.out.println("Background image not found at /resources/Background.jpg");
+            bgIcon = new ImageIcon(new BufferedImage(1200, 800, BufferedImage.TYPE_INT_ARGB));
+        }
         Image scaled = bgIcon.getImage().getScaledInstance(1200, 800, Image.SCALE_SMOOTH);
         JLabel background = new JLabel(new ImageIcon(scaled));
         background.setBounds(0, 0, 1200, 800);
@@ -73,6 +80,12 @@ public class LoginView extends JFrame {
         createAccountLink.setBounds(220, 380, 140, 30);
         createAccountLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         loginPanel.add(createAccountLink);
+
+        forgotPasswordLink.setForeground(Color.BLUE);
+        forgotPasswordLink.setFont(new Font("Comic Sans MS", Font.PLAIN, 16));
+        forgotPasswordLink.setBounds(40, 420, 140, 30);
+        forgotPasswordLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        loginPanel.add(forgotPasswordLink);
     }
 
     private void addLabeledField(JPanel panel, String label, JComponent field, int y) {
@@ -85,13 +98,16 @@ public class LoginView extends JFrame {
         field.setFont(new Font("Comic Sans MS", Font.PLAIN, 16));
         panel.add(field);
     }
-    // getters
-    public String getUsername(){
+
+    // Getters
+    public String getUsername() {
         return usernameField.getText();
     }
-    public String getPassword(){
+
+    public String getPassword() {
         return new String(passwordField.getPassword());
     }
+
     public JButton getLoginButton() {
         return loginButton;
     }
@@ -100,10 +116,9 @@ public class LoginView extends JFrame {
         return createAccountLink;
     }
 
-
-    /*public JLabel getCreateAccountLink() {
-        return createAccountLink;
-    }*/
+    public JLabel getForgotPasswordLink() {
+        return forgotPasswordLink;
+    }
 
     public void showError(String message) {
         JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
