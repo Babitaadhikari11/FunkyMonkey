@@ -2,10 +2,9 @@ package demogame.view;
 
 import demogame.controller.GameController;
 import demogame.model.GameOverListener;
-import javax.swing.*;
 import java.awt.*;
 import java.util.logging.Logger;
-import java.util.logging.Level;
+import javax.swing.*;
 
 public class GameView extends JFrame implements GameOverListener {
     private static final Logger LOGGER = Logger.getLogger(GameView.class.getName());
