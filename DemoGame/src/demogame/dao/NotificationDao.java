@@ -59,3 +59,19 @@ private static final Logger LOGGER = Logger.getLogger(NotificationDao.class.getN
             return false;
         }
     }
+    // Retrieve all notifications from the database
+    public List<Notification> getAllNotifications() {
+        List<Notification> notifications = new ArrayList<>();
+        String sql = "SELECT id, message FROM " + TABLE_NAME;
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                notifications.add(new Notification(rs.getInt("id"), rs.getString("message")));
+            }
+            LOGGER.info("Retrieved " + notifications.size() + " notifications");
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error retrieving notifications", e);
+        }
+        return notifications;
+    }
