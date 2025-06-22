@@ -45,84 +45,89 @@ public class LoadingView extends JFrame {
     }
 
     private void initializeComponents() {
-        try {
-            // Logo setup
-            ImageIcon logoIcon = new ImageIcon(getClass().getResource("/resources/logoo.png"));
-            if (logoIcon.getImage() == null) {
-                LOGGER.warning("Failed to load logo image: /resources/logoo.png");
-                logoLabel = new JLabel("Funky Monkey");
-            } else {
-                Image scaledLogo = logoIcon.getImage().getScaledInstance(300, 300, Image.SCALE_SMOOTH);
-                logoLabel = new JLabel(new ImageIcon(scaledLogo));
-            }
-
-            // Progress bar
-            progressBar = new JProgressBar(0, 100);
-            progressBar.setStringPainted(true);
-            progressBar.setForeground(Color.RED);
-            progressBar.setBackground(Color.WHITE);
-            progressBar.setPreferredSize(new Dimension(400, 30));
-
-            // Loading text
-            loadingLabel = new JLabel("Loading Game......🐒");
-            loadingLabel.setFont(new Font("Comic Sans MS", Font.BOLD, 24));
-            loadingLabel.setForeground(Color.BLACK);
-
-            // Tips and tricks section
-            tipLabel = new JLabel("Loading tips...");
-            tipLabel.setFont(new Font("Comic Sans MS", Font.ITALIC, 16));
-            tipLabel.setForeground(Color.BLACK);
-            tipLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error initializing components", e);
-            JOptionPane.showMessageDialog(null,
-                "Error initializing loading screen: " + e.getMessage(),
-                "Loading Error",
-                JOptionPane.ERROR_MESSAGE);
+    try {
+        // Logo setup
+        ImageIcon logoIcon = new ImageIcon(getClass().getResource("/resources/logoo.png"));
+        if (logoIcon.getImage() == null) {
+            LOGGER.warning("Failed to load logo image: /resources/logoo.png");
+            logoLabel = new JLabel("Funky Monkey");
+        } else {
+            Image scaledLogo = logoIcon.getImage().getScaledInstance(300, 300, Image.SCALE_SMOOTH);
+            logoLabel = new JLabel(new ImageIcon(scaledLogo));
         }
+
+        // Progress bar
+        progressBar = new JProgressBar(0, 100);
+        progressBar.setStringPainted(true);
+        progressBar.setForeground(Color.RED);
+        progressBar.setBackground(Color.WHITE);
+        progressBar.setPreferredSize(new Dimension(400, 30));
+
+        // Loading text
+        loadingLabel = new JLabel("Loading Game......🐒");
+        loadingLabel.setFont(new Font("Comic Sans MS", Font.BOLD, 24));
+        loadingLabel.setForeground(Color.BLACK);
+
+        // Tips and tricks section
+        tipLabel = new JLabel("Loading tips...");
+        tipLabel.setFont(new Font("Comic Sans MS", Font.ITALIC, 16));
+        tipLabel.setForeground(Color.BLACK);
+        tipLabel.setHorizontalAlignment(SwingConstants.CENTER);
+    } catch (Exception e) {
+        LOGGER.log(Level.SEVERE, "Error initializing components", e);
+        // Initialize fallback components
+        logoLabel = new JLabel("Funky Monkey");
+        progressBar = new JProgressBar(0, 100);
+        loadingLabel = new JLabel("Loading Game...");
+        tipLabel = new JLabel("Loading tips...");
     }
+}
+
 
     private void layoutComponents() {
-        try {
-            GridBagConstraints gbc = new GridBagConstraints();
+    try {
+        GridBagConstraints gbc = new GridBagConstraints();
 
-            // Central panel
-            JPanel centerPanel = new JPanel(new GridBagLayout());
-            centerPanel.setOpaque(false);
+        // Central panel
+        JPanel centerPanel = new JPanel(new GridBagLayout());
+        centerPanel.setOpaque(false);
 
-            // Logo label
-            gbc.gridx = 0;
-            gbc.gridy = 0;
-            gbc.insets = new Insets(0, 0, 20, 0);
-            centerPanel.add(logoLabel, gbc);
+        // Logo label
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(0, 0, 20, 0);
+        centerPanel.add(logoLabel, gbc);
 
-            // Loading label
-            gbc.gridy = 1;
-            gbc.insets = new Insets(0, 0, 10, 0);
-            centerPanel.add(loadingLabel, gbc);
+        // Loading label
+        gbc.gridy = 1;
+        gbc.insets = new Insets(0, 0, 10, 0);
+        centerPanel.add(loadingLabel, gbc);
 
-            // Progress bar
-            gbc.gridy = 2;
-            centerPanel.add(progressBar, gbc);
+        // Progress bar
+        gbc.gridy = 2;
+        centerPanel.add(progressBar, gbc);
 
-            // Add center panel to frame
-            gbc.gridy = 0;
-            add(centerPanel, gbc);
+        // Add center panel to frame
+        gbc.gridy = 0;
+        add(centerPanel, gbc);
 
-            // Tips and tricks at bottom
-            gbc.gridy = 1;
-            gbc.insets = new Insets(20, 0, 50, 0);
-            add(tipLabel, gbc);
+        // Tips and tricks at bottom
+        gbc.gridy = 1;
+        gbc.insets = new Insets(20, 0, 50, 0);
+        add(tipLabel, gbc);
 
-            LOGGER.info("LoadingView components laid out successfully");
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error laying out components", e);
-            JOptionPane.showMessageDialog(null,
-                "Error setting up loading screen layout: " + e.getMessage(),
-                "Loading Error",
-                JOptionPane.ERROR_MESSAGE);
-        }
+        LOGGER.info("LoadingView components laid out successfully");
+    } catch (Exception e) {
+        LOGGER.log(Level.SEVERE, "Error laying out components", e);
+        // Fallback layout
+        getContentPane().setLayout(new FlowLayout());
+        getContentPane().add(logoLabel);
+        getContentPane().add(loadingLabel);
+        getContentPane().add(progressBar);
+        getContentPane().add(tipLabel);
     }
+}
+
 
     public void updateProgress(int progress) {
         progressBar.setValue(progress);
