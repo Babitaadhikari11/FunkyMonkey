@@ -22,7 +22,7 @@ public class AdminView3 extends javax.swing.JFrame {
     public AdminView3() {
         initComponents();
         setMinimumSize(new java.awt.Dimension(1200, 600)); // Standardized
-        setSize(1200, 600); // Standardized
+        setSize(1200, 800); // Standardized
         setLocationRelativeTo(null); // Center the window
     }
 
