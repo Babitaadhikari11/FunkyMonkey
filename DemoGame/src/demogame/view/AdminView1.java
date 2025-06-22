@@ -38,7 +38,7 @@ public class AdminView1 extends JFrame {
 
     public AdminView1() {
         setMinimumSize(new java.awt.Dimension(1200, 600)); // Standardized
-        setSize(1200, 600); // Standardized
+        setSize(1200, 800); // Standardized
         setLocationRelativeTo(null); // Center the window
         initializeUI();
     }
