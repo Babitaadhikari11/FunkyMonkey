@@ -7,9 +7,14 @@ import demogame.controller.ScoreController;
 import demogame.model.Monkey;
 import demogame.model.Obstacle;
 import demogame.model.TutorialOverlay;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -53,9 +58,13 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
     private BananaView bananaView;
     private SpriteManager spriteManager;
     private ScoreController scoreController;
+
     private static final Logger LOGGER = Logger.getLogger(GamePanel.class.getName());
 
-    // Background
+
+    private static final Logger LOGGER = Logger.getLogger(GamePanel.class.getName());
+
+    // Background images
     private Image jungle1;
     private Image jungle2;
     private Image obstacleImage;
@@ -82,6 +91,7 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
         setBackground(Color.BLACK);
         setDoubleBuffered(true);
         setFocusable(true);
+
         setLayout(null); // Use null layout for absolute positioning of quitButton
 
         try {
@@ -118,10 +128,13 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
             jungle2 = new ImageIcon(getClass().getResource("/resources/Bg2.jpg")).getImage();
             obstacleImage = new ImageIcon(getClass().getResource("/resources/obstacle.png")).getImage();
 
+
             bgX1 = 0;
-            bgX2 = jungle1.getWidth(null);
+            bgX2 = jungle1 != null ? jungle1.getWidth(null) : PANEL_WIDTH;
 
             spriteManager = new SpriteManager();
+
+
 
             LOGGER.info("Resources loaded successfully");
         } catch (Exception e) {
@@ -130,6 +143,7 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
     }
 
     private void setupGame() {
+
         try {
             int monkeyStartX = 50;
             int monkeyStartY = GROUND_LEVEL - MONKEY_HEIGHT - 50;
@@ -138,6 +152,7 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
             monkeyController = new MonkeyController(monkey);
             monkeyController.setGamePanel(this);
             obstacleController = new ObstacleController(PANEL_WIDTH, PLAY_LEVEL, this);
+
 
             for (Obstacle obstacle : obstacleController.getObstacles()) {
                 obstacle.setCollisionListener(this);
@@ -149,7 +164,55 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error setting up game", e);
         }
+
     }
+private void startNotificationTimer() {
+    if (notificationTimer != null) {
+        try {
+            notificationTimer.cancel();
+            LOGGER.info("Existing notification timer canceled");
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error canceling notification timer", e);
+        }
+        notificationTimer = null;
+    }
+    try {
+        notificationTimer = new Timer();
+        notificationTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if (!isPaused && !isGameOver && !tutorialActive) {
+                    notificationMessage = gameView.getGameController().getRandomNotification();
+                    if (notificationMessage != null) {
+                        showNotification = true;
+                        if (notificationSound != null) {
+                            notificationSound.setFramePosition(0);
+                            notificationSound.start();
+                        }
+                        SwingUtilities.invokeLater(() -> repaint());
+                        new Timer().schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                showNotification = false;
+                                SwingUtilities.invokeLater(() -> repaint());
+                            }
+                        }, 5000);
+                        LOGGER.info("Notification displayed: " + notificationMessage);
+                    } else {
+                        LOGGER.warning("No notification message available");
+                    }
+                } else {
+                    LOGGER.info("Notification skipped: Paused=" + isPaused + ", GameOver=" + isGameOver + ", TutorialActive=" + tutorialActive);
+                }
+            }
+        }, 10_000, 120_000); // Changed initial delay from 30_000 to 10_000
+        LOGGER.info("Notification timer started with initial delay: 10 seconds");
+    } catch (Exception e) {
+        LOGGER.log(Level.SEVERE, "Error starting notification timer", e);
+    }
+}
+     
+
 
     private void startGameLoop() {
         try {
@@ -159,7 +222,9 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error starting game loop", e);
         }
+
     }
+}
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -180,19 +245,25 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
         updateBananas();
         checkCollisions();
     }
+    
 
     private void updateBackground() {
+        if (jungle1 == null || jungle2 == null) {
+            LOGGER.log(Level.WARNING, "Cannot update background: images not loaded");
+            return;
+        }
         float speed = BG_SPEED * gameSpeed;
         bgX1 -= speed;
         bgX2 -= speed;
 
-        if (bgX1 + PANEL_WIDTH <= 0) {
+        if (jungle1 != null && bgX1 + jungle1.getWidth(null) <= 0) {
             bgX1 = bgX2 + PANEL_WIDTH;
         }
-        if (bgX2 + PANEL_WIDTH <= 0) {
+        if (jungle2 != null && bgX2 + jungle2.getWidth(null) <= 0) {
             bgX2 = bgX1 + PANEL_WIDTH;
         }
     }
+
 
     private void updateMonkey() {
         monkey.update();
@@ -266,10 +337,15 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
     }
 
+
     private void drawBackground(Graphics2D g2d) {
         if (jungle1 != null && jungle2 != null) {
             g2d.drawImage(jungle1, bgX1, 0, PANEL_WIDTH, PANEL_HEIGHT, null);
             g2d.drawImage(jungle2, bgX2, 0, PANEL_WIDTH, PANEL_HEIGHT, null);
+        } else {
+            LOGGER.log(Level.WARNING, "Cannot draw background: images not loaded");
+            g2d.setColor(Color.BLACK);
+            g2d.fillRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT);
         }
     }
 
@@ -302,6 +378,73 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
         }
     }
 
+    private void drawObstacles(Graphics2D g2d) {
+        if (obstacleImage != null) {
+            if (obstacleController == null || obstacleController.getObstacles() == null) {
+                LOGGER.log(Level.WARNING, "Cannot draw obstacles: obstacleController or obstacles list is null");
+                return;
+            }
+            for (Obstacle obstacle : obstacleController.getObstacles()) {
+                if (obstacle.isActive()) {
+                    g2d.drawImage(obstacleImage, 
+                                obstacle.getX(), 
+                                obstacle.getY(), 
+                                obstacle.getWidth(), 
+                                obstacle.getHeight(), 
+                                null);
+                }
+            }
+        } else {
+            LOGGER.log(Level.WARNING, "Cannot draw obstacles: obstacleImage not loaded");
+        }
+    }
+
+    private void drawNotificationOverlay(Graphics2D g2d) {
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8f));
+        g2d.setColor(new Color(0, 0, 0, 200));
+        int popupWidth = 400;
+        int popupHeight = 100;
+        int x = (PANEL_WIDTH - popupWidth) / 2;
+        int y = 100;
+        g2d.fillRoundRect(x, y, popupWidth, popupHeight, 20, 20);
+
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+        g2d.setColor(Color.YELLOW);
+        g2d.setFont(new Font("Segoe UI Emoji", Font.BOLD, 18));
+        FontMetrics fm = g2d.getFontMetrics();
+        int textWidth = fm.stringWidth(notificationMessage);
+        int textX = x + (popupWidth - textWidth) / 2;
+        int textY = y + popupHeight / 2 + fm.getAscent() / 2;
+        g2d.drawString(notificationMessage, textX, textY);
+    }
+
+    private void setupGraphics(Graphics2D g2d) {
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
+                            RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, 
+                            RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+        setupGraphics(g2d);
+        
+        drawBackground(g2d);
+        drawGround(g2d);
+        drawGameObjects(g2d);
+        drawUI(g2d);
+        
+        if (showNotification && notificationMessage != null) {
+            drawNotificationOverlay(g2d);
+        }
+        
+        if (tutorial.isVisible()) {
+            drawTutorialOverlay(g2d);
+        }
+    }
+
     private void drawTutorialOverlay(Graphics2D g2d) {
         if (tutorial.isVisible()) {
             g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
@@ -326,6 +469,7 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
         }
     }
 
+
     private void drawObstacles(Graphics2D g2d) {
         if (obstacleImage != null && obstacleController != null) {
             for (Obstacle obstacle : obstacleController.getObstacles()) {
@@ -336,6 +480,7 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
             }
         }
     }
+
 
     private void drawUI(Graphics2D g2d) {
         if (gameView == null && bananaView != null && bananaController != null) {
@@ -382,6 +527,31 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
         textWidth = fm.stringWidth(restartText);
         g2d.drawString(restartText, (PANEL_WIDTH - textWidth) / 2, PANEL_HEIGHT / 2 + 20);
     }
+    
+    private void updateMonkey() {
+        if (monkey != null) {
+            monkey.update();
+            
+            if (monkey.getX() < MONKEY_MIN_X) {
+                monkey.setX(MONKEY_MIN_X);
+                monkey.setVelocityX(0);
+            }
+            if (monkey.getX() > MONKEY_MAX_X) {
+                monkey.setX(MONKEY_MAX_X);
+                monkey.setVelocityX(0);
+            }
+            
+            int groundY = GROUND_LEVEL - MONKEY_HEIGHT - 50;
+            if (monkey.getY() > groundY) {
+                monkey.setY(groundY);
+                monkey.setOnGround(true);
+                monkey.setVelocityY(0);
+            } else {
+                monkey.setOnGround(false);
+            }
+        }
+    }
+
 
     @Override
     public void onObstacleCollision(Obstacle obstacle) {
@@ -389,6 +559,7 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
             LOGGER.info("Obstacle collision at x=" + obstacle.getX() + ", y=" + obstacle.getY());
             handleGameOver();
         }
+
     }
 
     private void handleGameOver() {
@@ -449,6 +620,8 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
             bananaController.restart();
         }
 
+        startNotificationTimer();
+
         requestFocusInWindow();
         LOGGER.info("Game restarted, tutorialActive=" + tutorialActive);
     }
@@ -464,6 +637,7 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
             LOGGER.info("Pause toggled: isPaused=" + isPaused);
         }
     }
+
 
     private class GameKeyListener extends KeyAdapter {
         @Override
@@ -489,8 +663,10 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
                     System.exit(0);
                 }
             }
+
         }
     }
+}
 
     public boolean isTutorialActive() {
         return tutorialActive;
@@ -513,12 +689,30 @@ public class GamePanel extends JPanel implements ActionListener, Obstacle.Collis
     }
 
     public void cleanup() {
-        if (gameLoop != null) {
-            gameLoop.stop();
+    if (gameLoop != null) {
+        try {
+            gameLoop.cancel();
+            gameLoop.purge();
+            LOGGER.info("Game loop timer canceled and purged");
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error canceling game loop timer", e);
         }
+        gameLoop = null;
+    }
+    if (notificationTimer != null) {
+        try {
+            notificationTimer.cancel();
+            LOGGER.info("Notification timer canceled");
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error canceling notification timer", e);
+        }
+
         if (scoreController != null) {
             scoreController.dispose();
         }
         LOGGER.info("GamePanel cleaned up");
+
     }
+    LOGGER.info("GamePanel cleanup completed");
+}
 }
