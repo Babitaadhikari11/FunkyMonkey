@@ -6,9 +6,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -19,13 +21,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class AdminView1 extends JFrame {
     private static final Logger LOGGER = Logger.getLogger(AdminView1.class.getName());
@@ -124,7 +122,7 @@ public class AdminView1 extends JFrame {
         activeUsersLabel.setFont(new Font("Arial", Font.BOLD, 16)); // Larger, bold font
         newestUserLabel.setFont(new Font("Arial", Font.BOLD, 16)); // Larger, bold font
         totalUsersLabel.setForeground(Color.BLUE); // Distinct color
-        activeUsersLabel.setForeground(Color.GREEN); // Distinct color
+        activeUsersLabel.setForeground(Color.gray); // Distinct color
         newestUserLabel.setForeground(Color.RED); // Distinct color
 
         JPanel labelsPanel = new JPanel();
