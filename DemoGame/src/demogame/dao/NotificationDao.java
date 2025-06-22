@@ -75,3 +75,15 @@ private static final Logger LOGGER = Logger.getLogger(NotificationDao.class.getN
         }
         return notifications;
     }
+    // Retrieve a random notification from the database
+    public Notification getRandomNotification() {
+        List<Notification> notifications = getAllNotifications();
+        if (notifications.isEmpty()) {
+            LOGGER.warning("No notifications available in the database");
+            return null;
+        }
+        Random random = new Random();
+        Notification randomNotification = notifications.get(random.nextInt(notifications.size()));
+        LOGGER.info("Selected random notification: " + randomNotification.getMessage());
+        return randomNotification;
+    }
