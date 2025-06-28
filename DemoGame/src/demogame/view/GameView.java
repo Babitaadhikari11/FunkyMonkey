@@ -57,14 +57,7 @@ public class GameView extends JFrame implements GameOverListener {
 
         setContentPane(layeredPane);
 
-        addKeyListener(new java.awt.event.KeyAdapter() {
-            @Override
-            public void keyPressed(java.awt.event.KeyEvent e) {
-                if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE) {
-                    showPauseMenu();
-                }
-            }
-        });
+       
     }
 
     public void updateScore(int score) {
@@ -76,8 +69,13 @@ public class GameView extends JFrame implements GameOverListener {
     }
 
     public void showPauseMenu() {
-        if (gamePanel != null) {
-            gamePanel.togglePause();
+        if (gamePanel != null || gamePanel.isGameOver() || gamePanel.isTutorialActive()) {
+            // gamePanel.togglePause();
+        }
+        if(!gamePanel.isPaused()){
+            gamePanel.togglePause(); //pause
+            LOGGER.info("GAMEPAUSED");
+
         }
         String[] options = {"Resume", "Restart", "Quit"};
         int choice = JOptionPane.showOptionDialog(
@@ -93,7 +91,7 @@ public class GameView extends JFrame implements GameOverListener {
 
         switch (choice) {
             case 0: // Resume
-                if (gamePanel != null) {
+                if (gamePanel != null && gamePanel.isPaused()) {
                     gamePanel.togglePause();
                 }
                 break;

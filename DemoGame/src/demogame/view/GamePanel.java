@@ -580,35 +580,37 @@ private void drawNotificationOverlay(Graphics2D g2d) {
             LOGGER.info("Pause toggled: isPaused=" + isPaused);
         }
     }
-
-   private class GameKeyListener extends KeyAdapter {
+private class GameKeyListener extends KeyAdapter {
     @Override
     public void keyPressed(KeyEvent e) {
         if (tutorial.isVisible()) {
             tutorial.setVisible(false);
             tutorialActive = false;
+            startNotificationTimer();
             requestFocusInWindow();
             LOGGER.info("Tutorial dismissed, tutorialActive=" + tutorialActive);
-            startNotificationTimer(); // Restart timer after tutorial dismissal
             return;
         }
-       
 
-            if (e.getKeyCode() == KeyEvent.VK_P) {
+        if (e.getKeyCode() == KeyEvent.VK_P || e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+            if (!isGameOver && !tutorialActive) {
                 togglePause();
-            } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE && gameView != null) {
-                togglePause();
-            } else if (isGameOver && e.getKeyCode() == KeyEvent.VK_R) {
-                restartGame();
-            } else if (isGameOver && e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                if (gameView != null) {
-                    gameView.dispose();
-                } else {
-                    System.exit(0);
-                }
+                LOGGER.info("Pause toggled via key: " + (e.getKeyCode() == KeyEvent.VK_P ? "P" : "ESC"));
+            }
+        } else if (isGameOver && e.getKeyCode() == KeyEvent.VK_R) {
+            restartGame();
+            LOGGER.info("Game restarted via R key");
+        } else if (isGameOver && e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+            if (gameView != null) {
+                gameView.getGameController().quitGame();
+                LOGGER.info("Game quit via ESC key");
+            } else {
+                LOGGER.severe("Cannot quit game: gameView is null");
+                System.exit(0); // Fallback, but ideally handle gracefully
             }
         }
     }
+}
 
     public boolean isTutorialActive() {
         return tutorialActive;

@@ -187,6 +187,9 @@ public class GameController {
     public void restartGame() {
         cleanup();
         currentScore = 0;
+        if(bananaController !=null){
+            bananaController.restart();
+        }
         startGame();
         LOGGER.info("Game restarted for userId: " + userId);
     }
