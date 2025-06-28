@@ -88,7 +88,7 @@ public class ForgotPasswordView extends JFrame {
         sendOtpButton.setFocusable(true); // Ensure it can receive focus
         sendOtpButton.setFont(new Font("Comic Sans MS", Font.BOLD, 14));
         sendOtpButton.setBackground(Color.RED);
-        sendOtpButton.setForeground(Color.WHITE);
+        sendOtpButton.setForeground(Color.BLACK);
         gbc.gridx = 0;
         gbc.gridy = 5;
         gbc.gridwidth = 2;
@@ -100,7 +100,7 @@ public class ForgotPasswordView extends JFrame {
         resetPasswordButton.setFocusable(true);
         resetPasswordButton.setFont(new Font("Comic Sans MS", Font.BOLD, 14));
         resetPasswordButton.setBackground(Color.RED);
-        resetPasswordButton.setForeground(Color.WHITE);
+        resetPasswordButton.setForeground(Color.BLACK);
         gbc.gridx = 0;
         gbc.gridy = 6;
         gbc.gridwidth = 2;

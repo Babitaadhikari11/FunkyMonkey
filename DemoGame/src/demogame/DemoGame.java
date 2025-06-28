@@ -14,7 +14,7 @@ public class DemoGame {
 
     public static void main(String[] args) {
         // Test database connection at startup
-        testDatabaseConnection();
+        // testDatabaseConnection();
 
         SwingUtilities.invokeLater(() -> {
             LoginView loginPanel = new LoginView();
@@ -29,19 +29,7 @@ public class DemoGame {
         }));
     }
 
-    private static void testDatabaseConnection() {
-        try {
-            if (DatabaseConnection.testConnection()) {
-                LOGGER.info("Database connection test successful");
-            } else {
-                LOGGER.severe("Database connection test failed");
-                System.exit(1);
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error testing database connection", e);
-            System.exit(1);
-        }
-    }
+  
 
     private static void cleanup() {
         try {

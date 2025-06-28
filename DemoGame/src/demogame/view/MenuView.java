@@ -179,7 +179,7 @@ public class MenuView extends JFrame {
                 soundButton.setText("Sound: OFF");
                 LOGGER.info("Sound turned OFF for userId: " + gameController.getUserId());
             } else {
-                BackgroundMusicPlayer.playLoop("C:\\Users\\acer\\Desktop\\FunkyMonkey\\DemoGame\\src\\resources\\music1.wav");
+                BackgroundMusicPlayer.playLoop("/Users/babitaadhikari/Desktop/FinalGame/FunkyMonkey/DemoGame/src/resources/music1.wav");
                 soundButton.setText("Sound: ON");
                 LOGGER.info("Sound turned ON for userId: " + gameController.getUserId());
             }

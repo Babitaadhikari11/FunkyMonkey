@@ -7,6 +7,8 @@ import demogame.dao.UserDao;
 import demogame.model.UserData;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import java.awt.Component;
 import java.awt.Image;
 import java.io.File;
 import java.sql.ResultSet;
@@ -15,7 +17,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-
+import demogame.dao.FeedbackDao;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
+import demogame.model.Feedback;
 public class UserUpdateController {
 
     private static final Logger LOGGER = Logger.getLogger(UserUpdateController.class.getName());
@@ -23,12 +29,14 @@ public class UserUpdateController {
     private UserDao userDAO;
     private UserData currentUser;
     private GameController gameController; // changed from menucontroller to gamecontroller
+    private FeedbackDao feedbackDao;
 
  
     public UserUpdateController(UserUpdateView view, UserData currentUser) {
         this.view = view;
         this.userDAO = new UserDao();
         this.currentUser = currentUser;
+        this.feedbackDao= new FeedbackDao();
         initializeController();
     }
 
@@ -36,6 +44,7 @@ public class UserUpdateController {
     private void initializeController() {
         initializeListeners();
         loadUserData();
+        loadFeedbackList(); //this is for loading feedback list
         setupWindowListener();
     }
 
@@ -46,6 +55,7 @@ public class UserUpdateController {
         view.getDeleteAccountButton().addActionListener(e -> handleAccountDeletion());
         view.getBackButton().addActionListener(e -> handleBack());
         view.getViewHistoryButton().addActionListener(e -> showChangeHistory());
+        view.getSubmitFeedbackButton().addActionListener(e -> handleSubmitFeedback()); //lsiten feedback submission
     }
 
     // profile picture and username from database show
@@ -61,6 +71,195 @@ public class UserUpdateController {
             handleError("Error loading user data", e);
         }
     }
+    // load feedback
+ private void loadFeedbackList() {
+    try {
+        // Get feedback list from database
+        List<Feedback> feedbackList = feedbackDao.getUserFeedback(currentUser.getId());
+        
+        // Debug print
+        System.out.println("Loading feedback list. Found: " + feedbackList.size() + " items");
+        
+        // Update the view
+        view.updateFeedbackList(feedbackList);
+        
+        // Add listeners to buttons after the list is updated
+        addFeedbackButtonListeners();
+        
+        LOGGER.info("Feedback list loaded successfully");
+    } catch (Exception e) {
+        LOGGER.severe("Error loading feedback list: " + e.getMessage());
+        e.printStackTrace();  // Add this for debugging
+        handleError("Error loading feedback list", e);
+    }
+}
+// Separate method for adding button listeners
+private void addFeedbackButtonListeners() {
+    for (Component comp : view.feedbackListPanel.getComponents()) {
+        if (comp instanceof JPanel) {
+            traversePanel((JPanel) comp);
+        }
+    }
+}
+// Helper method to traverse panels and find buttons
+private void traversePanel(JPanel panel) {
+    for (Component comp : panel.getComponents()) {
+        if (comp instanceof JButton) {
+            JButton button = (JButton) comp;
+            String actionCommand = button.getActionCommand();
+            if (actionCommand != null) {
+                if (actionCommand.startsWith("edit_")) {
+                    button.addActionListener(this::handleEditFeedback);
+                } else if (actionCommand.startsWith("delete_")) {
+                    button.addActionListener(this::handleDeleteFeedback);
+                }
+            }
+        } else if (comp instanceof JPanel) {
+            traversePanel((JPanel) comp);
+        }
+    }
+}
+    // handle submission
+   private void handleSubmitFeedback() {
+    try {
+        int rating = view.getFeedbackRating();
+        String feedbackText = view.getFeedbackText();
+        
+        // Add validation
+        if (feedbackText == null || feedbackText.trim().isEmpty()) {
+            view.showError("Please enter feedback text");
+            return;
+        }
+        
+        if (rating < 1 || rating > 5) {
+            view.showError("Rating must be between 1 and 5");
+            return;
+        }
+
+        System.out.println("Submitting feedback - Rating: " + rating + ", Text: " + feedbackText);
+        
+        Feedback feedback = new Feedback(0, currentUser.getId(), rating, feedbackText.trim());
+        
+        if (feedbackDao.saveFeedback(feedback)) {
+            view.showSuccess("Feedback submitted successfully!");
+            view.clearFeedbackInput();
+            loadFeedbackList();  // Reload the list
+            LOGGER.info("Feedback submitted successfully");
+        } else {
+            view.showError("Failed to submit feedback");
+            
+        }
+    } catch (Exception e) {
+        LOGGER.severe("Error in handleSubmitFeedback: " + e.getMessage());
+        
+    }
+}
+    // handle feedback button for input field and updating on sbumit
+
+    private void handleEditFeedback(ActionEvent e) {
+    try {
+        //extratc feedback id from action commant
+        int feedbackId = Integer.parseInt(e.getActionCommand().split("_")[1]);
+        List<Feedback> feedbackList = feedbackDao.getUserFeedback(currentUser.getId());
+        //get feedback from database
+        Feedback feedback = feedbackList.stream()
+            .filter(f -> f.getId() == feedbackId)
+            .findFirst()
+            .orElse(null);
+            
+        if (feedback != null) {
+            view.ratingSlider.setValue(feedback.getRating());
+            view.feedbackTextArea.setText(feedback.getFeedbackText());  
+            JButton submitButton = view.getSubmitFeedbackButton();
+            submitButton.setText("Update Feedback");  
+            // storing original text
+            final String original = feedback.getFeedbackText();
+            final int originalRating =feedback.getRating();
+            // removing all and clear
+            for(ActionListener listener : submitButton.getActionListeners()){
+                 submitButton.removeActionListener(listener);
+            }
+            
+            //this is for updating feedback 
+            submitButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent evt){
+                    updateFeedback(feedbackId, original, originalRating);
+                }
+            }); 
+        }else{
+            view.showError("FEEDBack not found");
+        }
+    }catch(Exception ex){
+        handleError("error", ex);
+    }
+}
+// method for updating feedback
+private void updateFeedback(int feedbackId, String original, int originalRating){
+    try{
+        int newRating = view.getFeedbackRating();
+        String newText = view.getFeedbackText().trim();
+        // ensure valid input
+        // Validate input
+        if (newText.isEmpty()) {
+            view.showError("Feedback text cannot be empty");
+            return;
+        }
+        
+        if (newRating < 1 || newRating > 5) {
+            view.showError("Rating must be between 1 and 5");
+            return;
+        }
+        
+        // Check if anything changed
+        if (newRating == originalRating && newText.equals(original)) {
+            view.showError("No changes made to feedback");
+            resetFeedbackForm();
+            return;
+        }
+       // update feedback
+       if(feedbackDao.updateFeedback(feedbackId, newRating, newText)){
+        view.showSuccess("FEEDBACK UPDATED :)");
+        resetFeedbackForm();
+        loadFeedbackList();
+       }else{
+        view.showError("newText");
+       }
+
+    }catch(Exception e){
+        handleError("error updating", e);
+    }
+}
+// helping method to reset
+private void resetFeedbackForm(){
+    view.clearFeedbackInput();
+    JButton submitButton = view.getSubmitFeedbackButton();
+    submitButton.setText("Submit Feedback");
+
+    // remove all lsitener
+    for(ActionListener listener : submitButton.getActionListeners()){
+        submitButton.removeActionListener(listener);
+    }
+}
+                    // delete feedback
+    private void handleDeleteFeedback(ActionEvent e) {
+        int feedbackId = Integer.parseInt(e.getActionCommand().split("_")[1]);
+        if (view.showConfirmDialog("Are you sure you want to delete this feedback?") == JOptionPane.YES_OPTION) {
+            try {
+                if (feedbackDao.deleteFeedback(feedbackId)) {
+                    view.showSuccess("Feedback deleted!");
+                    loadFeedbackList();
+                    LOGGER.info("Feedback deleted for feedbackId: " + feedbackId + ", userId: " + currentUser.getId());
+                } else {
+                    view.showError("Failed to delete feedback.");
+                    
+                }
+            } catch (Exception ex) {
+                handleError("Error deleting feedback", ex);
+            }
+        }
+    }
+
 
     private void setupWindowListener() {
         view.addWindowListener(new WindowAdapter() {
@@ -219,6 +418,7 @@ public class UserUpdateController {
             view.showError(message + ": " + e.getMessage());
         });
     }
+    
 
     
     public void cleanup() {
